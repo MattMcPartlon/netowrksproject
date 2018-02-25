@@ -1,0 +1,1103 @@
+#LyX 2.1 created this file. For more info see http://www.lyx.org/
+\lyxformat 474
+\begin_document
+\begin_header
+\textclass article
+\begin_preamble
+\usepackage {url}
+\usepackage [numbers]{natbib}
+\end_preamble
+\use_default_options true
+\begin_modules
+theorems-ams-bytype
+theorems-sec-bytype
+\end_modules
+\maintain_unincluded_children false
+\language english
+\language_package default
+\inputencoding auto
+\fontencoding global
+\font_roman default
+\font_sans default
+\font_typewriter default
+\font_math auto
+\font_default_family default
+\use_non_tex_fonts false
+\font_sc false
+\font_osf false
+\font_sf_scale 100
+\font_tt_scale 100
+\graphics default
+\default_output_format default
+\output_sync 0
+\bibtex_command default
+\index_command default
+\float_placement H
+\paperfontsize default
+\spacing single
+\use_hyperref false
+\papersize default
+\use_geometry true
+\use_package amsmath 1
+\use_package amssymb 1
+\use_package cancel 1
+\use_package esint 1
+\use_package mathdots 1
+\use_package mathtools 1
+\use_package mhchem 1
+\use_package stackrel 1
+\use_package stmaryrd 1
+\use_package undertilde 1
+\cite_engine basic
+\cite_engine_type default
+\biblio_style plain
+\use_bibtopic false
+\use_indices false
+\paperorientation portrait
+\suppress_date false
+\justification true
+\use_refstyle 1
+\index Index
+\shortcut idx
+\color #008000
+\end_index
+\leftmargin 2cm
+\topmargin 2cm
+\rightmargin 2cm
+\bottommargin 2cm
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation indent
+\paragraph_indentation default
+\quotes_language english
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\tracking_changes false
+\output_changes false
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
+\end_header
+
+\begin_body
+
+\begin_layout Title
+A Network Analysis of the Stock Market
+\end_layout
+
+\begin_layout Author
+Matt McPartlon
+\end_layout
+
+\begin_layout Section*
+Old stuff included in version 1
+\end_layout
+
+\begin_layout Subsection*
+Introduction
+\end_layout
+
+\begin_layout Standard
+The goal is to build and analyze network for the US stock market based on
+ a distance based function of different stock price time series.
+ Traditional stock market network analysis is usually done on 
+\emph on
+correlation threshold networks
+\emph default
+ (defined in next section), however these methods have severe limitations.
+ The distance function proposed deviates from correlation based network
+ construction and is motivated by sequence alignment methods in bioinformatics.
+ Analysis of networks resulting from the distance based network construction
+ will be done, and resulting networks will be used to build portfolios,
+ and identify highly market structure and other important characteristics.
+ A comparison of networks resulting from this approach and those resulting
+ from correlation based threshold networks will also be conducted.
+\end_layout
+
+\begin_layout Subsection*
+Definitions
+\end_layout
+
+\begin_layout Standard
+For a set of time series 
+\begin_inset Formula $\mathcal{S}$
+\end_inset
+
+ where each 
+\begin_inset Formula $S\in\mathcal{S}$
+\end_inset
+
+ is defined at 
+\begin_inset Formula $m$
+\end_inset
+
+ discrete time steps, let 
+\begin_inset Formula $S(t)$
+\end_inset
+
+ denote the value of series 
+\begin_inset Formula $S$
+\end_inset
+
+ at time 
+\begin_inset Formula $t.$
+\end_inset
+
+ Let 
+\begin_inset Formula $f:\mathcal{S}^{2}\rightarrow\mathbb{R}$
+\end_inset
+
+ be any function taking 
+\begin_inset Formula $k-$
+\end_inset
+
+subsets 
+\begin_inset Formula $\mathcal{S}$
+\end_inset
+
+ into 
+\begin_inset Formula $\mathbb{R},$
+\end_inset
+
+ we can define a
+\emph on
+ threshold graph 
+\emph default
+
+\begin_inset Formula $G_{\theta}=\{V,E,f\}$
+\end_inset
+
+ on 
+\begin_inset Formula $\mathcal{S}$
+\end_inset
+
+ where there is a vertex 
+\begin_inset Formula $v(S)\in V$
+\end_inset
+
+ for each 
+\begin_inset Formula $S\in\mathcal{S}$
+\end_inset
+
+ and an edge 
+\begin_inset Formula $e=\{v(S_{i}),v(S_{j})\}$
+\end_inset
+
+ connecting distinct time series in 
+\begin_inset Formula $G$
+\end_inset
+
+ if and only if 
+\begin_inset Formula $f(S_{i},S_{j})\geq\theta.$
+\end_inset
+
+ An important example of such a network is the 
+\emph on
+correlation threshold graph
+\emph default
+, where 
+\begin_inset Formula $f$
+\end_inset
+
+ is the function that computes the correlation between time series 
+\begin_inset Formula $S_{i}$
+\end_inset
+
+ and 
+\begin_inset Formula $S_{j},$
+\end_inset
+
+ and 
+\begin_inset Formula $\theta\in[-1,1].$
+\end_inset
+
+ For concreteness, say 
+\begin_inset Formula $\theta=0.5,$
+\end_inset
+
+ then two time series are adjacent is and only if their correlation coefficient
+ is at least 
+\begin_inset Formula $0.5.$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection*
+Motivation
+\end_layout
+
+\begin_layout Standard
+Correlation threshold networks of stocks are extremely relevant in portfolio
+ management, The investment philosophy for most funds is to 
+\begin_inset Quotes eld
+\end_inset
+
+beat the market.
+\begin_inset Quotes erd
+\end_inset
+
+ In order to achieve that goal, they need to select the stocks that are
+ representative of the market.
+ A common choice would be stocks high market caps which could potentially
+ yield greater impact to the market.
+ If we apply this logic to a stock network, we could try to select stocks
+ (vertices) with high centralities.
+ Furthermore, in a stock market, changes in a stocks price might effect
+ the other stock's prices.
+ If these kinds of interactions can be realized, not only the stock itself,
+ but also the past prices of other stocks interacting with it might be used
+ while predicting its stock price.
+ These techniques could also be used to identify groups of mutually 
+\begin_inset Quotes eld
+\end_inset
+
+distant
+\begin_inset Quotes erd
+\end_inset
+
+ stocks in order to manage risk, or to detect community structures, where
+ stocks in different communities tend to fluctuate independently.
+\end_layout
+
+\begin_layout Standard
+Although correlation threshold networks have given nice results to the motivatio
+ns described above, they have several pitfalls.
+ The first is that these networks only detect directional changes in time
+ series.
+ Another is that in periods where the market as a whole performs poorly/strongly
+, correlation coefficient s may be inflated.
+ The next is that correlation methods operate under the implicit assumption
+ that similar/opposing price movements between two stocks always occur over
+ the same time interval.
+ To be more concrete, it may be the case that 
+\begin_inset Formula $S_{1}(t+1)$
+\end_inset
+
+ and 
+\begin_inset Formula $S_{2}(t)$
+\end_inset
+
+ are highly correlated at certain times, and 
+\begin_inset Formula $S_{1}(t+2),$
+\end_inset
+
+ 
+\begin_inset Formula $S_{2}(t)$
+\end_inset
+
+ are highly correlated at other times.
+ Standard correlation based methods could not capture this.
+ This begs the question: Is correlation a true indication of dependence/independ
+ence in stocks? 
+\end_layout
+
+\begin_layout Subsection*
+Description of Method
+\end_layout
+
+\begin_layout Standard
+The goal is to analyze the threshold graphs of fixed a set of stock price
+ time series over varying time horizons, and time periods.
+ The threshold function we will use is inspired from sequence alignment
+ methods in Bioinformatics, and involves converting each time series into
+ a sequence of symbols analogous to nucleotides in a DNA sequence.
+ Each symbol 
+\begin_inset Formula $x_{i}$
+\end_inset
+
+ will encode some notion of price movement, for example, the sequence of
+ prices 
+\begin_inset Formula $(1,2,1,1,0,1)$
+\end_inset
+
+ could be encoded as 
+\begin_inset Formula $(U,D,N,D,U)$
+\end_inset
+
+ where 
+\begin_inset Formula $U$
+\end_inset
+
+ in position 
+\begin_inset Formula $i$
+\end_inset
+
+ indicates that the price went up from time 
+\begin_inset Formula $i$
+\end_inset
+
+ to time 
+\begin_inset Formula $+1,$
+\end_inset
+
+ 
+\begin_inset Formula $D$
+\end_inset
+
+ indicates down, and 
+\begin_inset Formula $N$
+\end_inset
+
+ indicates no movement.
+ More complicated encodings are possible as well.
+ Encodings that capture the magnitude/scale of movements could be considered,
+ as well as those that capture the micro-structure of price movements -
+ each possible structure could be encoded with its own symbol.
+ 
+\end_layout
+
+\begin_layout Standard
+After a sequence of symbols are generated for each stock price time series,
+ we can conduct pairwise sequence alignment techniques to calculate the
+ 
+\begin_inset Quotes eld
+\end_inset
+
+distance
+\begin_inset Quotes erd
+\end_inset
+
+ between respective stocks corresponding sequences.
+ With these estimates, threshold networks can be built, and examined using
+ standard network analysis techniques.
+ To reassert the generality of this technique, it is not hard to show that
+ the 
+\begin_inset Formula $U,D,N$
+\end_inset
+
+ encoding above can be used with a high enough gap-penalty set to produce
+ a distance estimate that is proportional to the correlation between two
+ stocks price series.
+ 
+\end_layout
+
+\begin_layout Subsection*
+Previous Work
+\end_layout
+
+\begin_layout Standard
+Several papers 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Relational_Istanbul,PMFG_Threshold,ThresholdNetwork,Song2011,Eryigit20093551"
+
+\end_inset
+
+ have analyzed various market networks where nodes represent some trading
+ entity, and edges reflect the correlation between prices of the entities
+ being traded.
+ Additional papers have tried to generalize this approach.
+ Some authors consider computing cross correlations by including asset returns
+ and volume trading as the main variables to study the financial market.
+ Some of the analysis techniques on correlation threshold graphs include
+ analysis of minimum spanning trees (MST) and planar maximally filtered
+ graphs (PMFG), community detection, clustering coefficients, as well as
+ topological properties such as the average length of shortest paths, cuts,
+ and centrality measures.
+ Some of these methods were used by 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Eryigit20093551"
+
+\end_inset
+
+to empirically confirm an increase in globalization between 2005-2009 by
+ analyzing the dynamics of several international markets.
+ 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "PMFG_Threshold"
+
+\end_inset
+
+ also used these methods to construct diversified portfolios which performed
+ better than several market indexes by selecting stocks with high centrality.
+ Most recently, dependency networks have been used to analyze market structure
+ 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Kenett2010DominatingCO"
+
+\end_inset
+
+.
+ These networks rely on the partial correlation between assets - a measure
+ of how the correlation between two variables, e.g., stock returns, is affected
+ by a third variable.
+ The resulting information is used to calculate the dependancy 
+\begin_inset Formula $D(i,j)$
+\end_inset
+
+ of an asset 
+\begin_inset Formula $i$
+\end_inset
+
+ on another asset 
+\begin_inset Formula $j.$
+\end_inset
+
+ Roughly speaking ,
+\begin_inset Formula $D(i,j)$
+\end_inset
+
+ is a measure of the average influence of node
+\begin_inset Formula $j$
+\end_inset
+
+ on the correlations 
+\begin_inset Formula $C(i,k)$
+\end_inset
+
+ over all nodes 
+\begin_inset Formula $k$
+\end_inset
+
+ not equal to 
+\begin_inset Formula $j$
+\end_inset
+
+.
+ By modeling financial networks this way, 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Kenett2010DominatingCO"
+
+\end_inset
+
+ were able to quantitatively show the dependency relationships between the
+ different economic sectors - revealing that the structure of the network
+ is dominated by companies belonging to the financial sector, which are
+ the 
+\begin_inset Quotes eld
+\end_inset
+
+hubs
+\begin_inset Quotes erd
+\end_inset
+
+ in the dependency network.
+ 
+\end_layout
+
+\begin_layout Subsubsection*
+Below is a list of some important considerations taken in previous work
+\end_layout
+
+\begin_layout Itemize
+Time period that the data is collected over (Long term vs.
+ short term)
+\end_layout
+
+\begin_layout Itemize
+Time horizon that asset prices are sampled (end of trading day price, hourly
+ prices, weekly returns etc.)
+\end_layout
+
+\begin_layout Itemize
+Time lag effect of stock prices (i.e.
+ rather than consider the correlation between 
+\begin_inset Formula $S_{i}(t)$
+\end_inset
+
+ and 
+\begin_inset Formula $S_{j}(t),$
+\end_inset
+
+ consider the correlation between 
+\begin_inset Formula $S_{i}(t+\Delta t)$
+\end_inset
+
+ and 
+\begin_inset Formula $S_{j}(t)$
+\end_inset
+
+ where 
+\begin_inset Formula $\Delta t$
+\end_inset
+
+ indicates the amount of 
+\begin_inset Quotes eld
+\end_inset
+
+lag
+\begin_inset Quotes erd
+\end_inset
+
+).
+\end_layout
+
+\begin_layout Itemize
+The geographic region in which assets are traded (or the exchange that they
+ are traded on)
+\end_layout
+
+\begin_layout Itemize
+The market sector in which assets are traded
+\end_layout
+
+\begin_layout Itemize
+Inclusion of additional information such as trade volume, market indicators,
+ etc
+\end_layout
+
+\begin_layout Subsection*
+Proposed Analysis
+\end_layout
+
+\begin_layout Enumerate
+Compare distance based threshold networks to correlation threshold networks
+ and dependency networks.
+ (i.e.
+ do they yield the same types of clustering, same degrees, etc)
+\end_layout
+
+\begin_layout Enumerate
+Explore the persistence of these measures over time
+\end_layout
+
+\begin_layout Enumerate
+Explore the effect of different penalties (i.e.
+ the affect of changing the gap penalty, deletion penalty, etc)
+\end_layout
+
+\begin_layout Enumerate
+Explore the affect of different alignment schemes (i.e.
+ local alignment, global alignment, semi-global alignment)
+\end_layout
+
+\begin_layout Enumerate
+Explore the effect of different penalty matrices (i.e.
+ explore the effect of assigning different penalties to aligning different
+ symbols)
+\end_layout
+
+\begin_layout Enumerate
+Explore the distribution of connectedness in the network.
+ Several authors have shown that for correlation threshold networks, the
+ distribution is well approximated by a power law in the tails.
+ Is this the case for the our network? If so, what is the tail-exponent
+ of the degree distribution?
+\end_layout
+
+\begin_layout Enumerate
+Explore how these measures related to realized trading profits and trade
+ correlations (i.e.
+ information diffusion is indeed an important factor, then the centrality
+ should be superior to other measures).
+\end_layout
+
+\begin_layout Subsection*
+Plan of Attack
+\end_layout
+
+\begin_layout Itemize
+Gather desired market data for highly capitalized US stocks by end of this
+ week (1/20) 
+\begin_inset Formula $\checkmark$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+Code Sequence alignment algorithms by end of next week (1/27) 
+\begin_inset Formula $\checkmark$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+Generate meaningful symbols for different price movements, and determine
+ a systematic way to determine alignment penalties, then produce some of
+ the graphs described (2/3)
+\end_layout
+
+\begin_layout Itemize
+Explore the effect of different symbol sets, and different penalties, in
+ terms of the properties of the networks produced (2/10) 
+\end_layout
+
+\begin_layout Itemize
+Compare to correlation threshold networks, and begin writing up results
+ (2/10-Deadline)
+\end_layout
+
+\begin_layout Section*
+More Recent Work
+\end_layout
+
+\begin_layout Subsection*
+Showing that Correlation can be captured using sequence alignment methods.
+\end_layout
+
+\begin_layout Standard
+Let 
+\begin_inset Formula $S=s_{1},\dots,s_{n}$
+\end_inset
+
+ be a real valued time series indexed by 
+\begin_inset Formula $t$
+\end_inset
+
+ for 
+\begin_inset Formula $t=1,\dots,n$
+\end_inset
+
+.
+ Let 
+\begin_inset Formula $\bar{S},$
+\end_inset
+
+ and
+\begin_inset Formula $\sigma_{S}$
+\end_inset
+
+ denote the mean and standard deviation 
+\begin_inset Formula $S$
+\end_inset
+
+ respectively.
+ Also, define 
+\begin_inset Formula $\Delta(S):=(\frac{s_{t}-\bar{S}}{\sigma_{S}}:\ t=1,\dots,n),$
+\end_inset
+
+ the ordered list of so-called 
+\begin_inset Formula $"z-scores,"$
+\end_inset
+
+ where 
+\begin_inset Formula $\Delta(S)_{t}=\frac{s_{t}-\bar{S}}{\sigma_{S}}$
+\end_inset
+
+.
+ For two analogously defined time series 
+\begin_inset Formula $X$
+\end_inset
+
+ and 
+\begin_inset Formula $Y,$
+\end_inset
+
+ the correlation of 
+\begin_inset Formula $X$
+\end_inset
+
+ and 
+\begin_inset Formula $Y$
+\end_inset
+
+, denoted by 
+\begin_inset Formula $\rho(X,Y),$
+\end_inset
+
+ is defined as 
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{eqnarray*}
+\rho(X,Y) & = & \frac{1}{n-1}\sum_{t=1}^{n}\left(\frac{x_{t}-\bar{x}}{\sigma_{X}}\right)\left(\frac{y_{t}-\bar{y}}{\sigma_{Y}}\right)\\
+ & = & \frac{1}{n-1}\sum_{t=1}^{n}\Delta(X)_{t}\cdot\Delta(Y)_{t}
+\end{eqnarray*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Consider the following encoding of the same two time series 
+\begin_inset Formula $X$
+\end_inset
+
+ and 
+\begin_inset Formula $Y$
+\end_inset
+
+.
+ Begin by defining an alphabet 
+\begin_inset Formula $\mathcal{A}=\{A_{\delta}:\delta\in\Delta(X)\cup\Delta(Y)\}$
+\end_inset
+
+.
+ Let 
+\begin_inset Formula $e_{X}:[n]\rightarrow\mathcal{A}^{n}$
+\end_inset
+
+ be given by 
+\begin_inset Formula $e_{X}(t)=A_{\Delta(X)_{t}}.$
+\end_inset
+
+ Define 
+\begin_inset Formula $e_{Y}$
+\end_inset
+
+ analogously.
+ To be concrete, 
+\begin_inset Formula $e_{X}(t)$
+\end_inset
+
+ is the letter 
+\begin_inset Formula $A_{\delta}$
+\end_inset
+
+ such that 
+\begin_inset Formula $\delta=\frac{x_{t}-\bar{X}}{\sigma_{X}}$
+\end_inset
+
+, i.e.
+ the 
+\begin_inset Formula $z-$
+\end_inset
+
+score of 
+\begin_inset Formula $x_{t}.$
+\end_inset
+
+ We now have an encoding of the time series 
+\begin_inset Formula $X$
+\end_inset
+
+ and 
+\begin_inset Formula $Y$
+\end_inset
+
+ that captures the same information as their sequence of 
+\begin_inset Formula $z-$
+\end_inset
+
+scores.
+ We can then create a distance function 
+\begin_inset Formula $d(\cdot,\cdot)$
+\end_inset
+
+ between two letters 
+\begin_inset Formula $A_{\delta},$
+\end_inset
+
+ 
+\begin_inset Formula $A_{\delta^{'}}\in\mathcal{A}$
+\end_inset
+
+, defined by 
+\begin_inset Formula $d(A_{\delta},A_{\delta^{'}})=\frac{\delta\cdot\delta^{'}}{n-1}.$
+\end_inset
+
+ Using standard pairwise global sequence alignment techniques to align the
+ sequences 
+\begin_inset Formula $\{e_{X}(t),e_{Y}(t)\}_{t=1,\dots n}$
+\end_inset
+
+ under the described distance function, and setting the gap penalty to positive
+ infinity, we can get the alignment score 
+\begin_inset Formula $s_{X,Y}$
+\end_inset
+
+ of 
+\begin_inset Formula $X$
+\end_inset
+
+ and 
+\begin_inset Formula $Y$
+\end_inset
+
+.
+ Note that using global alignment with an infinite gap penalty forces 
+\begin_inset Formula $e_{X}(t)$
+\end_inset
+
+ to align with 
+\begin_inset Formula $e_{Y}(t)$
+\end_inset
+
+, thus 
+\begin_inset Formula 
+\begin{eqnarray*}
+s_{X,Y} & = & \sum_{t=1}^{n}d(e_{X}(t),e_{Y}(t))\\
+ & = & \sum_{t=1}^{n}\frac{\Delta(X)_{t}\cdot\Delta(Y)_{t}}{n-1}\\
+ & = & \frac{1}{n-1}\sum_{t=1}^{n}\Delta(X)_{t}\cdot\Delta(Y)_{t}=\rho(X,Y)
+\end{eqnarray*}
+
+\end_inset
+
+Although this is somewhat contrived, this result shows that using sequence
+ alignment methods for creating threshold networks is at least as powerful
+ as that of correlation.
+\end_layout
+
+\begin_layout Subsection*
+Capturing Abnormal Market Conditions
+\end_layout
+
+\begin_layout Standard
+One of the issues with correlation based methods is that they do not capture
+ abnormal market conditions.
+ Take, for example, two stocks 
+\begin_inset Formula $X$
+\end_inset
+
+ and 
+\begin_inset Formula $Y$
+\end_inset
+
+ where 
+\begin_inset Formula $x_{t}$
+\end_inset
+
+ and 
+\begin_inset Formula $y_{t}$
+\end_inset
+
+ denote the price of 
+\begin_inset Formula $X$
+\end_inset
+
+ and 
+\begin_inset Formula $Y$
+\end_inset
+
+ at time 
+\begin_inset Formula $t.$
+\end_inset
+
+ Suppose That 
+\begin_inset Formula $X$
+\end_inset
+
+ and 
+\begin_inset Formula $Y$
+\end_inset
+
+ have strong negative correlation from time 
+\begin_inset Formula $0,1,\dots,t_{0}$
+\end_inset
+
+, but at time 
+\begin_inset Formula $t_{0}+1,$
+\end_inset
+
+ there is some good news in the market, and both stock values rise, producing
+ a period of positive correlation between the two time series.
+ This is illustrated below.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Two negatively correlated stocks, each responding positively to good news
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename C:/Users/matt/Pictures/networks ex.2.pdf
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+Here, stock 
+\begin_inset Formula $X,$
+\end_inset
+
+ (blue) has perfect negative correlation with stock 
+\begin_inset Formula $Y,$
+\end_inset
+
+ (yellow) from time 
+\begin_inset Formula $1,\dots,t_{0}=9$
+\end_inset
+
+, and strong positive correlation from time 
+\begin_inset Formula $t_{0}+1=10$
+\end_inset
+
+ to time 
+\begin_inset Formula $n=13.$
+\end_inset
+
+ The correlation value between stocks 
+\begin_inset Formula $X$
+\end_inset
+
+ and 
+\begin_inset Formula $Y$
+\end_inset
+
+ is 
+\begin_inset Formula $0.75,$
+\end_inset
+
+ well above the threshold value used in the construction of many correlation
+ based networks.
+\end_layout
+
+\end_inset
+
+It is not uncommon for external events to impact overall market condition.
+ It is well understood that news of impending events can create large swings
+ in overall market prices for weeks before and after they actually occur.
+ Several papers 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "RareEvents,RareEvents2,EDMANS2006SportsSA"
+
+\end_inset
+
+ have been written on this alone, and range from analyzing market swings
+ due to political events to swings caused by sports sentiment.
+ 
+\end_layout
+
+\begin_layout Standard
+We have seen that correlation can have bias to overall market sentiment,
+ In contrast, alignment methods actually highlight points of abnormal behavior
+ between pairs of stocks by adding gaps at points where the relationship
+ between them begins to change.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+The effect of alignment on stock time series
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename C:/Users/matt/Pictures/networks alignment example2.PNG
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\series bold
+\begin_inset Box Boxed
+position "t"
+hor_pos "c"
+has_inner_box 1
+inner_pos "t"
+use_parbox 0
+use_makebox 0
+width "100col%"
+special "none"
+height "1in"
+height_special "totalheight"
+status open
+
+\begin_layout Plain Layout
+
+\series bold
+On Left:
+\series default
+ The original time series of two stocks which are negatively correlated,
+ except for the period from 
+\begin_inset Formula $t_{0}=9$
+\end_inset
+
+ to 
+\begin_inset Formula $t=14.$
+\end_inset
+
+ 
+\series bold
+On right:
+\series default
+ The time series of the same two stocks with 
+\begin_inset Quotes eld
+\end_inset
+
+gaps
+\begin_inset Quotes erd
+\end_inset
+
+ added (shown in green)
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Note that the chart on the right, corresponding to the alignment between
+ the two time series, shows strong correlation, and gaps correspond to points
+ in which the relationship between the correlation in each stock changes.
+ Also, although the two stocks in the above figure appear to be negatively
+ correlated with the exception of time 
+\begin_inset Formula $t_{0}=9\mbox{ to time }t=14,$
+\end_inset
+
+ the correlation between the stocks is 0.62, indicating moderately strong
+ correlation between the two time series.
+\end_layout
+
+\begin_layout Subsection*
+Turning this into a More Meaningful Network
+\end_layout
+
+\begin_layout Standard
+Once we have pairwise alignments for all stocks considered, we can look
+ at the frequency of gaps inserted at specific times across all alignments
+ to determine periods where the market is behaving abnormally.
+ We can then proceed by removing these abnormal time periods from our data,
+ to generate a more clear picture of the underlying relationship between
+ pairs of stocks in the chosen market.
+ We can also compare networks generated with and without these periods removed,
+ and analyze their properties.
+\end_layout
+
+\begin_layout Standard
+\begin_inset CommandInset bibtex
+LatexCommand bibtex
+bibfiles "C:/Users/matt/Desktop/networks"
+options "plain"
+
+\end_inset
+
+
+\end_layout
+
+\end_body
+\end_document
