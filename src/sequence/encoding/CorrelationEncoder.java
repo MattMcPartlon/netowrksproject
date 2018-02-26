@@ -25,7 +25,7 @@ public abstract class CorrelationEncoder extends Encoder {
 	protected double getVariance(int start, int end, Sequence s) {
 		checkValid(start, end, s);
 		if (start == end) {
-			return s.getVal(start);
+			return Math.pow(s.getVal(start),2);
 		}
 		double mean = getMean(start, end, s);
 		double sum = 0;

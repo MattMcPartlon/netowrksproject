@@ -6,8 +6,8 @@ import org.omg.IOP.ENCODING_CDR_ENCAPS;
 
 import sequence.Element;
 import sequence.Sequence;
-import utils.FieldValues;
 import utils.StockDataObj;
+import utils.Utilities;
 
 public class CorrelationWindowEncoder extends CorrelationEncoder {
 
@@ -18,13 +18,12 @@ public class CorrelationWindowEncoder extends CorrelationEncoder {
 	}
 
 	protected double[] getMovingAverages(Sequence s) {
-		double[] movingAvgs = new double[s.length() - window_ + 1];
+		double[] movingAvgs = new double[s.length() - window_+1 ];
 
-		for (int i = 0; i < movingAvgs.length; i++) {
-
-			movingAvgs[i] = getMean(i + 1, i + window_, s);
+		for (int i = 1; i < movingAvgs.length; i++) {
+			movingAvgs[i] = getMean(i , i + window_-1, s);
 		}
-		if (FieldValues.VERBOSE) {
+		if (Utilities.VERBOSE) {
 			System.out.println("moving averages for " + s.getID() + ": " + Arrays.toString(movingAvgs));
 			System.out.println();
 		}
@@ -35,10 +34,10 @@ public class CorrelationWindowEncoder extends CorrelationEncoder {
 	protected double[] getMovingVars(Sequence s) {
 
 		double[] movingVars = new double[s.length() - window_ + 1];
-		for (int i = 0; i < movingVars.length; i++) {
-			movingVars[i] = getVariance(i + 1, i + window_, s);
+		for (int i = 1; i < movingVars.length; i++) {
+			movingVars[i] = getVariance(i , i + window_-1, s);
 		}
-		if (FieldValues.VERBOSE) {
+		if (Utilities.VERBOSE) {
 			System.out.println("moving vars for " + s.getID() + ": " + Arrays.toString(movingVars));
 			System.out.println();
 		}
@@ -51,9 +50,10 @@ public class CorrelationWindowEncoder extends CorrelationEncoder {
 		double[] movingVars = getMovingVars(toEncode);
 		double[] movingAvgs = getMovingAverages(toEncode);
 		Sequence encoded = new Sequence(new StockDataObj((StockDataObj) toEncode.getData(), this.getEncodingType()));
-		for (int i = 0; i < movingAvgs.length; i++) {
+		for (int i = 1; i < movingAvgs.length; i++) {
 			double val = (toEncode.getVal(i + window_) - movingAvgs[i]) / Math.pow(movingVars[i], 0.5);
-			encoded.add(new Element(getLabel(val), i + 1, "correlation window encoded value", val));
+			double transformed=Math.signum(val)*(Math.log(Math.abs(val))+1);
+			encoded.add(new Element(getLabel(transformed), i + 1, "correlation window encoded value", transformed));
 		}
 		return encoded;
 	}

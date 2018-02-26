@@ -11,9 +11,11 @@ import java.util.regex.Pattern;
 import sequence.Element;
 import sequence.Sequence;
 import sequence.encoding.EncodingType;
+import utils.Company;
 import utils.DataObj;
-import utils.FieldValues;
 import utils.StockDataObj;
+import utils.Time;
+import utils.Utilities;
 
 public class StockPriceReader extends SReader {
 
@@ -41,11 +43,22 @@ public class StockPriceReader extends SReader {
 
 					// date of first recorded price
 					regexMatcher.find();
-					String start = regexMatcher.group(1);
+					String[] start = regexMatcher.group(1).split(",");
 					// date of last recorded price
 					regexMatcher.find();
-					String end = regexMatcher.group(1);
-					DataObj dat = new StockDataObj(company, exchange, start, end, EncodingType.RawPrices);
+					String[] end = regexMatcher.group(1).split(",");
+
+					for (int i = 0; i < end.length; i++) {
+						start[i] = start[i].trim();
+						end[i] = end[i].trim();
+					}
+					Time startTime = new Time(Integer.parseInt(start[0]), Integer.parseInt(start[1]),
+							Integer.parseInt(start[2]));
+					Time endTime = new Time(Integer.parseInt(end[0]), Integer.parseInt(end[1]),
+							Integer.parseInt(end[2]));
+
+					Company c = Utilities.findCompany(company);
+					DataObj dat = new StockDataObj(c, startTime, endTime, EncodingType.RawPrices);
 
 					Sequence seq = new Sequence(dat);
 					int pos = 1;
@@ -53,8 +66,7 @@ public class StockPriceReader extends SReader {
 													// String
 						String price = regexMatcher.group(1);
 						double val = Double.parseDouble(price);
-						Element e = new Element(price, pos, "price of " + company + " on date: " + start + " + " + pos,
-								val);
+						Element e = new Element(price, pos, "price of " + company + " on date?" + " + " + pos, val);
 						seq.add(e);
 						pos++;
 
@@ -67,12 +79,12 @@ public class StockPriceReader extends SReader {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
 
 		return sequences;
 	}
 
 	public static void main(String[] args) {
+		Utilities.init();
 		String fileString = "C:/Users/matt/Desktop/StockDat/djia4.seqs";
 		File file = new File(fileString);
 		StockPriceReader r = new StockPriceReader(file);

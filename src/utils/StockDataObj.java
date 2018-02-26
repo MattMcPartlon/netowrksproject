@@ -4,17 +4,12 @@ import sequence.encoding.EncodingType;
 
 public class StockDataObj extends DataObj {
 
-	Sector sector_;
-	Exchange exchange_;
-	Group group_;
-	String startTime_, endTime_, company_;
+	Company company_;
+	Time startTime_, endTime_;
 	EncodingType eTy_;
 
-	public StockDataObj(String company, String exchange, String start, String end, EncodingType ty) {
+	public StockDataObj(Company company, Time start, Time end, EncodingType ty) {
 		company_ = company;
-		exchange_ = Exchange.getExchange(exchange);
-		group_ = Group.getGroup(company);
-		sector_ = Sector.getSector(company);
 		startTime_ = start;
 		endTime_ = end;
 		eTy_ = ty;
@@ -23,44 +18,33 @@ public class StockDataObj extends DataObj {
 
 	public StockDataObj(StockDataObj obj, EncodingType ty) {
 		company_ = obj.company_;
-		exchange_ = obj.exchange_;
-		group_ = obj.group_;
-		sector_ = obj.sector_;
 		startTime_ = obj.startTime_;
 		endTime_ = obj.endTime_;
 		eTy_ = ty;
 	}
 
-	public StockDataObj(String company, Exchange exchange, String start, String end) {
-		company_ = company;
-		exchange_ = exchange;
-		group_ = Group.getGroup(company);
-		sector_ = Sector.getSector(company);
-		startTime_ = start;
-		endTime_ = end;
 
-	}
 
 	@Override
 	public String getID() {
 		// TODO Auto-generated method stub
-		return company_;
+		return company_.getName();
 	}
 
 	@Override
 	public DataObj clone() {
-		return new StockDataObj(company_, exchange_, startTime_, endTime_);
+		return new StockDataObj(company_, startTime_, endTime_,eTy_);
 	}
 
-	public String getStartTime() {
+	public Time getStartTime() {
 		return startTime_;
 	}
 
-	public String getEndTime() {
+	public Time getEndTime() {
 		return endTime_;
 	}
 
-	public String getCompany() {
+	public Company getCompany() {
 		return company_;
 	}
 

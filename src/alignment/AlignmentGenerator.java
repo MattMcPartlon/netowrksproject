@@ -21,7 +21,7 @@ import sequence.encoding.Encoder;
 import sequence.encoding.SimpleCorrelationEncoder;
 import stats.AlignmentStats;
 import stats.CorrelationAlignmentStats;
-import utils.FieldValues;
+import utils.Utilities;
 
 public class AlignmentGenerator {
 
@@ -107,7 +107,7 @@ public class AlignmentGenerator {
 
 		for (int i = 0; i < encoded.size(); i++) {
 			Sequence s = encoded.get(i);
-			if (FieldValues.VERBOSE) {
+			if (Utilities.VERBOSE) {
 				System.out.println("getting alignments for " + s.getID());
 			}
 			for (int j = i + 1; j < encoded.size(); j++) {
@@ -121,16 +121,16 @@ public class AlignmentGenerator {
 	}
 
 	public void printAlignments(List<Alignment> als) {
-		if (FieldValues.VERBOSE) {
+		if (Utilities.VERBOSE) {
 			System.out.println("printing alignments: ");
 		}
 		int idx = 1;
 		for (Alignment al : als) {
-			if (FieldValues.VERBOSE) {
+			if (Utilities.VERBOSE) {
 				System.out.println("Alignment " + idx + ":");
 			}
-			if (FieldValues.TESTMODE) {
-				if (idx > FieldValues.MAX_ALIGNMENTS) {
+			if (Utilities.TESTMODE) {
+				if (idx > Utilities.MAX_ALIGNMENTS) {
 					break;
 				}
 			}
@@ -147,14 +147,14 @@ public class AlignmentGenerator {
 		List<Sequence> encoded = new ArrayList<>();
 		List<Sequence> rawSeqs = sr_.read();
 		for (Sequence toEncode : rawSeqs) {
-			if (FieldValues.VERBOSE) {
+			if (Utilities.VERBOSE) {
 				System.out.println("getting " + e_.getDescription() + " - encoding for: " + toEncode.getID());
 				System.out.println("unencoded: " + toEncode.toString());
 				System.out.println();
 			}
 			Sequence enc = e_.encode(toEncode);
 			encoded.add(enc);
-			if (FieldValues.VERBOSE) {
+			if (Utilities.VERBOSE) {
 				System.out.println(e_.getDescription() + " encoding for: " + toEncode.getID());
 				System.out.println("encoded: " + enc.toString());
 				System.out.println();
@@ -163,18 +163,6 @@ public class AlignmentGenerator {
 		return encoded;
 	}
 
-	public static void main(String[] args) {
-		String fileString = "C:/Users/matt/Desktop/StockDat/djia4.seqs";
-		File file = new File(fileString);
-		SReader sr = new StockPriceReader(file);
-		ScoreFunction f = new CorrelationScoreFunction(2, 3);
-		Aligner a = new NWGlobalAligner();
-		Encoder e = new CorrelationWindowEncoder(20);
-		AlignmentGenerator g = new AlignmentGenerator(sr, e, a, f, new CorrelationAlignmentStats());
-		List<Alignment> alignments= g.getAlignments();
-		g.printAlignments(alignments);
-		g.printStats(alignments);
 
-	}
 
 }

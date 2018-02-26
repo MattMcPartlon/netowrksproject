@@ -1,7 +1,7 @@
 package utils;
 
 public enum Exchange {
-	NYSE("NYSE", 1);
+	NYSE("NYSE", 1), AMEX("AMEX",2),NASDAQ("NASDAQ",3);
 	int id_;
 	String name_;
 
@@ -10,13 +10,10 @@ public enum Exchange {
 		id_ = id;
 	}
 
-	public static Exchange getExchange(String name) {
-		name = name.toLowerCase();
-		if (!FieldValues.TESTMODE) {
-			throw new UnsupportedOperationException();
-		} else {
-			return Exchange.NYSE;
-		}
+	
+	
+	public String getName(){
+		return name_;
 	}
 
 }

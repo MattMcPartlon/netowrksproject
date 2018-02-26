@@ -15,13 +15,17 @@ public class VertexDataObject extends DataObj {
 
 	@Override
 	public String getID() {
-	
+
 		return dat_.getID();
+	}
+	
+	public void setIndex(int index){
+		index_=index;
 	}
 
 	@Override
 	public DataObj clone() {
-		
+
 		return new VertexDataObject(dat_, index_);
 	}
 
@@ -35,11 +39,15 @@ public class VertexDataObject extends DataObj {
 
 	@Override
 	public boolean equals(Object obj) {
-		if(obj instanceof VertexDataObject){
-			VertexDataObject o= (VertexDataObject)obj;
-			return o.getData().equals(this.getData())&&this.getIndex()==o.getIndex();
+		if (obj instanceof VertexDataObject) {
+			VertexDataObject o = (VertexDataObject) obj;
+			return o.getData().equals(this.getData()) && this.getIndex() == o.getIndex();
 		}
 		return false;
 	}
 
+	public int hashCode() {
+		return this.dat_.getID().hashCode();
+
+	}
 }
