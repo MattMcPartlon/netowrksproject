@@ -18,9 +18,13 @@ public class VertexDataObject extends DataObj {
 
 		return dat_.getID();
 	}
-	
-	public void setIndex(int index){
-		index_=index;
+
+	public int getSectorID() {
+		return dat_.getCompany().getSectorID();
+	}
+
+	public void setIndex(int index) {
+		index_ = index;
 	}
 
 	@Override

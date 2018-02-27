@@ -1,0 +1,230 @@
+#LyX 2.1 created this file. For more info see http://www.lyx.org/
+\lyxformat 474
+\begin_document
+\begin_header
+\textclass article
+\use_default_options true
+\begin_modules
+theorems-ams-bytype
+theorems-sec-bytype
+\end_modules
+\maintain_unincluded_children false
+\language english
+\language_package default
+\inputencoding auto
+\fontencoding global
+\font_roman default
+\font_sans default
+\font_typewriter default
+\font_math auto
+\font_default_family default
+\use_non_tex_fonts false
+\font_sc false
+\font_osf false
+\font_sf_scale 100
+\font_tt_scale 100
+\graphics default
+\default_output_format default
+\output_sync 0
+\bibtex_command default
+\index_command default
+\float_placement H
+\paperfontsize default
+\spacing single
+\use_hyperref false
+\papersize default
+\use_geometry true
+\use_package amsmath 1
+\use_package amssymb 1
+\use_package cancel 1
+\use_package esint 1
+\use_package mathdots 1
+\use_package mathtools 1
+\use_package mhchem 1
+\use_package stackrel 1
+\use_package stmaryrd 1
+\use_package undertilde 1
+\cite_engine basic
+\cite_engine_type default
+\biblio_style plain
+\use_bibtopic false
+\use_indices false
+\paperorientation portrait
+\suppress_date false
+\justification true
+\use_refstyle 1
+\index Index
+\shortcut idx
+\color #008000
+\end_index
+\leftmargin 2cm
+\topmargin 2cm
+\rightmargin 2cm
+\bottommargin 2cm
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation indent
+\paragraph_indentation default
+\quotes_language english
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\tracking_changes false
+\output_changes false
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
+\end_header
+
+\begin_body
+
+\begin_layout Section
+Data Collection and Pre-processing
+\end_layout
+
+\begin_layout Standard
+Daily time-series of all 2800 companies traded at the New York Stock Exchange
+ (NYSE) between January 2010 and October 2015 from Bloomberg Market Data
+ Services.
+ The primary variables retrieved were closing price, high price, low price,
+ trading volume, market cap, daily number of news stories and twitter sentiment.
+ Additionally, we obtained descriptive information about every company;
+ this included field such as the Global Industry Classification Standard
+ (GICS) sector codes as well as the main country of operation.
+ 
+\end_layout
+
+\begin_layout Subsection
+Pre-processing for Model Input 
+\end_layout
+
+\begin_layout Standard
+Using raw stock-specific daily data points as features would lead to poor
+ generalization due to the nonstationarity and noisiness of the time-series
+ data.
+ We thus performed transformations on the raw values for the basic variables
+ (closing price, number of news stories, etc.) designed to combat each issue
+ before organizing the data for model input
+\end_layout
+
+\begin_layout Subsubsection
+Differencing and Dynamic Range Reduction
+\end_layout
+
+\begin_layout Standard
+To handle non-stationarity of raw values, we differenced and normalized,
+ transforming the raw daily timeseries into an absolute daily percent change
+ of the underlying value.
+ We encoded the sign of the percent change as separate feature, e.g.
+ “Direction of Change in Closing Price.” We then reduced the dynamic range
+ of each of the transformed time series by applying the log transformation
+ proposed by Tsoi et al [3].
+\end_layout
+
+\begin_layout Subsubsection
+Correlation Window Encoder
+\end_layout
+
+\begin_layout Standard
+This method produces a sequence of elements which capture the deviation
+ in the mean and variance of time series 
+\begin_inset Formula $X=X(t)$
+\end_inset
+
+ with respect to a given time window.
+ Given a window size 
+\begin_inset Formula $w>0$
+\end_inset
+
+, and starting time 
+\begin_inset Formula $t_{0}$
+\end_inset
+
+, we consider the period 
+\begin_inset Formula $[t_{0},t_{0}+1,\dots,t_{0}+w],$
+\end_inset
+
+ and define 
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{eqnarray*}
+\mu(X,t_{0},w) & = & \frac{1}{w}\sum_{t=t_{0}}^{t_{0}+w-1}X(t)\\
+\sigma^{2}(X,t_{0},w) & = & \begin{cases}
+\frac{1}{w-1}\sum_{t=t_{0}}^{t_{0}+w-1}\left(X(t)-\mu(X,t_{0},w)\right)^{2} & \mbox{if }w>1\\
+X(t_{0})^{2} & \mbox{if }w=1
+\end{cases}
+\end{eqnarray*}
+
+\end_inset
+
+The correlation window encoder produces a sequence 
+\begin_inset Formula $S(w)=\{\delta(t,w)\}_{t}$
+\end_inset
+
+, where
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{eqnarray*}
+x(w,t) & = & \frac{(x_{t+w}-\mu(X,t,w))}{\sigma(X,t,w)}\\
+\delta(w,t) & = & \mbox{sign}(x(w,t))\cdot(\log|x(w,t)|+1)
+\end{eqnarray*}
+
+\end_inset
+
+The motivation for considering 
+\begin_inset Formula $\delta(w,t)$
+\end_inset
+
+ of this form comes from Tsio et al [3].
+ This transformation handles non-stationarity of raw price values.
+ In the special case where 
+\begin_inset Formula $w=1$
+\end_inset
+
+, we have 
+\begin_inset Formula 
+\[
+x(w,t)=\frac{x_{t+1}-x_{t}}{x_{t}}
+\]
+
+\end_inset
+
+which corresponds to the percentage change in value of the time series 
+\begin_inset Formula $X$
+\end_inset
+
+ between times 
+\begin_inset Formula $t$
+\end_inset
+
+ and 
+\begin_inset Formula $t+1.$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+Pre-processing for Correlation Networks
+\end_layout
+
+\begin_layout Standard
+The raw time-series data retrieved from Mathematica's Financial market Database
+ was also preprocessed to enable construction of market networks for use
+ in the structural and analytical graph analysis project segments.
+ Specifically, the data was used to build, for each basic variable and time
+ period, a matrix of variable change correlations between each pair of stocks.
+ For a given time period (a particular quarter or year), this process began
+ by filtering out variables that had undefined values for more than 20%
+ of trading days.
+ Differencing was then performed to turn the series of raw values for a
+ particular stock and variable into a series of percentage changes between
+ trading days.
+\end_layout
+
+\end_body
+\end_document

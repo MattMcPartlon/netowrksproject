@@ -1,5 +1,7 @@
 package scoring;
 
+import java.awt.geom.Ellipse2D;
+
 import alignment.Aligner;
 import alignment.Alignment;
 import sequence.Element;
@@ -17,6 +19,7 @@ public abstract class ScoreFunction {
 
 	public double getRawScore(Alignment a) {
 		double score = 0;
+	
 		boolean gapOpen_ = false;
 		for (int i = 1; i <= a.length(); i++) {
 
@@ -34,6 +37,7 @@ public abstract class ScoreFunction {
 				}
 			}
 			if (!gapOpen_) {
+				
 				score += getScore(a.pairAt(i));
 			}
 		}

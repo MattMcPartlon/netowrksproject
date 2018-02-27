@@ -48,6 +48,7 @@ public class StockDataObj extends DataObj {
 		return company_;
 	}
 
+
 	public EncodingType getEncodingType() {
 		return eTy_;
 	}

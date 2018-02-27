@@ -6,6 +6,7 @@ public class WeightedEdge extends Edge {
 
 	public WeightedEdge(Vertex u, Vertex v, double weight) {
 		super(u, v);
+		
 		weight_ = weight;
 		// TODO Auto-generated constructor stub
 	}

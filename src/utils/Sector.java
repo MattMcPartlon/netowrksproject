@@ -13,7 +13,9 @@ public enum Sector {
 		name_=name;
 		id_=id;
 	}
-	
+	public int getID(){
+		return id_;
+	}
 	public String getName(){
 		return name_;
 	}

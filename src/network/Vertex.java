@@ -1,5 +1,6 @@
 package network;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -7,6 +8,7 @@ import java.util.HashSet;
 import java.util.TreeSet;
 
 import utils.DataObj;
+import utils.Utilities;
 
 public abstract class Vertex {
 
@@ -66,12 +68,18 @@ public abstract class Vertex {
 	public DataObj getData() {
 		return data_;
 	}
+	
 
-	public String printAdjacencyList(int numVerts){
-		double[] adj= new double[numVerts];
-		for(Vertex v: incidentEdges_.keySet()){
-			adj[v.getIndex()]=incidentEdges_.get(v).getWeight();
+	
+
+
+	public String getAdjacencyListAsString(int numVerts) {
+		double[] adj = new double[numVerts];
+		for (Vertex v : incidentEdges_.keySet()) {
+			adj[v.getIndex()] = incidentEdges_.get(v).getWeight();
 		}
+		return Utilities.mathematicaFormattedArray(adj);
+
 	}
 
 }

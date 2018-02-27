@@ -19,6 +19,10 @@ public class Company implements Comparable<Company> {
 	public Company(String symbol) {
 		ticker_ = symbol;
 	}
+	
+	public int getSectorID(){
+		return sector_.getID();
+	}
 
 	public String getName() {
 		return name_;

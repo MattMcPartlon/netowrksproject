@@ -24,6 +24,10 @@ public class StockVertex extends Vertex implements Comparable<StockVertex> {
 		return false;
 	}
 
+	public int getSectorID() {
+		return ((VertexDataObject) this.getData()).getSectorID();
+	}
+
 	@Override
 	public int hashCode() {
 		// TODO Auto-generated method stub

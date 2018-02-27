@@ -41,7 +41,7 @@ public class AlignmentGenerator {
 
 	}
 
-	private void printFormattedDI(String prefix,  String suffix, HashMap<Double, Integer> map) {
+	private void printFormattedDI(String prefix, String suffix, HashMap<Double, Integer> map) {
 
 		List<Double> keyset = new ArrayList<>(map.keySet());
 		Collections.sort(keyset);
@@ -51,7 +51,7 @@ public class AlignmentGenerator {
 		}
 		str = str.substring(0, str.length() - 1);
 		str += "}";
-		System.out.println(prefix+""+str+""+suffix);
+		System.out.println(prefix + "" + str + "" + suffix);
 	}
 
 	private void printFormattedII(String prefix, String suffix, HashMap<Integer, Integer> map) {
@@ -64,33 +64,33 @@ public class AlignmentGenerator {
 		}
 		str = str.substring(0, str.length() - 1);
 		str += "}";
-		System.out.println(prefix+""+str+""+suffix);
+		System.out.println(prefix + "" + str + "" + suffix);
 	}
 
 	public void printStats(Collection<Alignment> alignments) {
 		CorrelationAlignmentStats cStats = (CorrelationAlignmentStats) stats_;
 		// print gap frequency distribution
 		HashMap<Integer, Integer> gapFreqs = cStats.getGapFrequencies(alignments);
-		//System.out.println("gap frequencies: ");
-		printFormattedII("gapFreqs=",";",gapFreqs);
+		// System.out.println("gap frequencies: ");
+		printFormattedII("gapFreqs=", ";", gapFreqs);
 
 		// print offset distribution
 		HashMap<Double, Integer> offsets = cStats.getOffsetDistribution(alignments, .25);
-		//System.out.println("offset distribution: ");
-		printFormattedDI("offsetDist=",";",offsets);
+		// System.out.println("offset distribution: ");
+		printFormattedDI("offsetDist=", ";", offsets);
 
 		// print score distribution
 		HashMap<Double, Integer> scoreDist = cStats.getScoreDistribution(alignments, 0.05, f_);
-		//System.out.println("score distribution: ");
-		printFormattedDI("scoreDist=",";",scoreDist);
+		// System.out.println("score distribution: ");
+		printFormattedDI("scoreDist=", ";", scoreDist);
 
 		// print gap open distribution
-		double[] gapOpenFreqs = cStats.getGapOpenPositionFreqs(alignments, 0, seqLength_+5);
-		String str= Arrays.toString(gapOpenFreqs);
-		str=str.substring(1, str.length()-1);
-		str="gapOpenDist= {"+str+"};";
+		double[] gapOpenFreqs = cStats.getGapOpenPositionFreqs(alignments, 0, seqLength_ + 5);
+		String str = Arrays.toString(gapOpenFreqs);
+		str = str.substring(1, str.length() - 1);
+		str = "gapOpenDist= {" + str + "};";
 		str.replace(']', '}');
-		//System.out.println("gap open distribution: ");
+		// System.out.println("gap open distribution: ");
 		System.out.println(str);
 
 	}
@@ -146,7 +146,17 @@ public class AlignmentGenerator {
 	private List<Sequence> loadSequences() {
 		List<Sequence> encoded = new ArrayList<>();
 		List<Sequence> rawSeqs = sr_.read();
+		if (Utilities.Randomized) {
+			Collections.shuffle(rawSeqs);
+		}
+		int count = 0;
+
 		for (Sequence toEncode : rawSeqs) {
+			if (Utilities.TESTMODE) {
+				if (Utilities.MAX_SEQS < count) {
+					break;
+				}
+			}
 			if (Utilities.VERBOSE) {
 				System.out.println("getting " + e_.getDescription() + " - encoding for: " + toEncode.getID());
 				System.out.println("unencoded: " + toEncode.toString());
@@ -159,10 +169,9 @@ public class AlignmentGenerator {
 				System.out.println("encoded: " + enc.toString());
 				System.out.println();
 			}
+			count++;
 		}
 		return encoded;
 	}
-
-
 
 }

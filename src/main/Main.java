@@ -10,6 +10,7 @@ import alignment.NWGlobalAligner;
 import io.sequence.NYSEDatReader;
 import io.sequence.SReader;
 import io.sequence.StockPriceReader;
+import network.ThresholdNetwork;
 import scoring.CorrelationScoreFunction;
 import scoring.ScoreFunction;
 import sequence.encoding.CorrelationWindowEncoder;
@@ -24,7 +25,7 @@ public class Main {
 		String fileString = "C:/Users/matt/Desktop/StockDat/prices-split-adjusted.csv";
 		File file = new File(fileString);
 		SReader sr = new NYSEDatReader(file, new Time(2012,1,1),new Time(2013,1,1),Utilities.close);
-		double O=2, E=3;
+		double O=2, E=1;
 		ScoreFunction f = new CorrelationScoreFunction(O,E);
 		Aligner a = new NWGlobalAligner();
 		Encoder e = new CorrelationWindowEncoder(2);
@@ -32,6 +33,10 @@ public class Main {
 		List<Alignment> alignments= g.getAlignments();
 		g.printAlignments(alignments);
 		g.printStats(alignments);
+		ThresholdNetwork network = new ThresholdNetwork(.9);
+		network.build(alignments, f);
+		network.printNetwork();
+		network.printSectorIDs();
 	}
 
 }

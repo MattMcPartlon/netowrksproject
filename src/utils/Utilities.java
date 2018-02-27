@@ -16,9 +16,10 @@ public class Utilities {
 	public static boolean DEBUG = false;
 	public static boolean TESTMODE = true;
 	public static boolean VERBOSE = true;
-	public static int MAX_ALIGNMENTS = 450;
+	public static int MAX_ALIGNMENTS = 45000;
+	public static int MAX_SEQS=100;
 	public static int open = 2, close = 3, low = 4, high = 5, volume = 6;
-
+	public static boolean Randomized=true;
 	public static List<Company> companies_ = new ArrayList<>();
 	public static Sector[] sectors_ = new Sector[] { Sector.CapitalGoods, Sector.ConsumerDurables,
 			Sector.ConsumerNonDurables, Sector.ConsumerServices, Sector.Energy, Sector.Financial, Sector.Healthcare,
@@ -93,6 +94,13 @@ public class Utilities {
 		throw new IllegalArgumentException("can't find sector: " + sector);
 	}
 
+	public static String mathematicaFormattedArray(double[] arr) {
+		String str = Arrays.toString(arr);
+		str = str.substring(1, str.length() - 1);
+		return "{" + str + "}";
+
+	}
+	
 	public static Company findCompany(String symbol) {
 		int idx = Collections.binarySearch(companies_, new Company(symbol));
 		if (idx < 0) {

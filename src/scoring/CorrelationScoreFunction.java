@@ -2,6 +2,7 @@ package scoring;
 
 import alignment.Alignment;
 import sequence.Element;
+import utils.Utilities;
 
 public class CorrelationScoreFunction extends ScoreFunction {
 
@@ -12,12 +13,16 @@ public class CorrelationScoreFunction extends ScoreFunction {
 
 	@Override
 	public double getSubScore(Element e1, Element e2) {
+		if(e1==Element.gap||e2==Element.gap){
+			throw new IllegalArgumentException("can't get substitution score of gap element!");
+		}
 		return e1.getVal() * e2.getVal();
 	}
 
 	@Override
 	public double getScore(Alignment a) {
 		// TODO Auto-generated method stub
+		
 		return getRawScore(a) / (a.length() - 1.0);
 	}
 	
@@ -28,6 +33,9 @@ public class CorrelationScoreFunction extends ScoreFunction {
 	 * @return
 	 */
 	public double getSubScoreNeg1(Element e1, Element e2) {
+		if(e1==Element.gap||e2==Element.gap){
+			throw new IllegalArgumentException("can't get substitution score of gap element!");
+		}
 		return (-1)*e1.getVal() * e2.getVal();
 	}
 
@@ -38,6 +46,9 @@ public class CorrelationScoreFunction extends ScoreFunction {
 	 * @return
 	 */
 	public double getSubScoreNeg2(Element e1, Element e2) {
+		if(e1==Element.gap||e2==Element.gap){
+			throw new IllegalArgumentException("can't get substitution score of gap element!");
+		}
 		return e1.getVal() * (-1)*e2.getVal();
 	}
 

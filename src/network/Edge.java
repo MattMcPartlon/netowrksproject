@@ -7,10 +7,10 @@ public abstract class Edge implements Comparable<Edge> {
 	Pair<Vertex, Vertex> endpts_;
 
 	public Edge(Vertex u, Vertex v) {
-		checkValid(u, v);
-		Pair<Vertex, Vertex> endpts = new Pair<>();
-		endpts.setFirst(u);
-		endpts.setSecond(v);
+		
+		endpts_ = new Pair<>();
+		endpts_.setFirst(u);
+		endpts_.setSecond(v);
 	}
 
 	public abstract double getWeight();
