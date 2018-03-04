@@ -116,7 +116,7 @@ public class GlobalCorrAligner extends CorrAligner {
 
 		aT.reverseOrder();
 		aS.reverseOrder();
-		return new Alignment(aS, aT, s_, t_);
+		return new Alignment(aS, aT, s_, t_, AlignmentType.GlobalCorr);
 
 	}
 
@@ -130,6 +130,12 @@ public class GlobalCorrAligner extends CorrAligner {
 	public String toString() {
 
 		return "global correlation aligner";
+	}
+
+	@Override
+	public Aligner clone() {
+		// TODO Auto-generated method stub
+		return new GlobalCorrAligner();
 	}
 
 	

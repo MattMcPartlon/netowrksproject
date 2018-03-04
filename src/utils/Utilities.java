@@ -17,7 +17,9 @@ public class Utilities {
 	public static boolean TESTMODE = true;
 	public static boolean VERBOSE = true;
 	public static int MAX_ALIGNMENTS = 45000;
-	public static int MAX_SEQS=100;
+	public static int MAX_SEQS=1000;
+	public static int MAX_LAG=7;
+	
 	public static int open = 2, close = 3, low = 4, high = 5, volume = 6;
 	public static boolean Randomized=true;
 	public static List<Company> companies_ = new ArrayList<>();
@@ -105,7 +107,8 @@ public class Utilities {
 		int idx = Collections.binarySearch(companies_, new Company(symbol));
 		if (idx < 0) {
 			if (VERBOSE) {
-				System.out.println("cannot find company: " + symbol);
+				System.out.println("can't find company: "+symbol);
+				
 			}
 			return null;
 		}

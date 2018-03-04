@@ -28,7 +28,7 @@ public class StockDataObj extends DataObj {
 	@Override
 	public String getID() {
 		// TODO Auto-generated method stub
-		return company_.getName();
+		return company_.getSymbol();
 	}
 
 	@Override
@@ -66,6 +66,11 @@ public class StockDataObj extends DataObj {
 			return w && x && y && z;
 		}
 		return false;
+	}
+
+	@Override
+	public String toString() {
+		return "stock data object for :"+this.getCompany().toString();
 	}
 
 }

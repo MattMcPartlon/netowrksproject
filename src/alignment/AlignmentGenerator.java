@@ -9,6 +9,9 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
+import java.util.Timer;
+import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.concurrent.CountDownLatch;
 
 import io.sequence.SReader;
 import io.sequence.SWriter;
@@ -21,6 +24,7 @@ import sequence.encoding.Encoder;
 import sequence.encoding.SimpleCorrelationEncoder;
 import stats.AlignmentStats;
 import stats.CorrelationAlignmentStats;
+import utils.Pair;
 import utils.Utilities;
 
 public class AlignmentGenerator {
@@ -41,82 +45,44 @@ public class AlignmentGenerator {
 
 	}
 
-	private void printFormattedDI(String prefix, String suffix, HashMap<Double, Integer> map) {
-
-		List<Double> keyset = new ArrayList<>(map.keySet());
-		Collections.sort(keyset);
-		String str = "{";
-		for (Double key : keyset) {
-			str += "{" + key + "," + map.get(key) + "},";
-		}
-		str = str.substring(0, str.length() - 1);
-		str += "}";
-		System.out.println(prefix + "" + str + "" + suffix);
-	}
-
-	private void printFormattedII(String prefix, String suffix, HashMap<Integer, Integer> map) {
-
-		List<Integer> keyset = new ArrayList<>(map.keySet());
-		Collections.sort(keyset);
-		String str = "{";
-		for (Integer key : keyset) {
-			str += "{" + key + "," + map.get(key) + "},";
-		}
-		str = str.substring(0, str.length() - 1);
-		str += "}";
-		System.out.println(prefix + "" + str + "" + suffix);
-	}
-
-	public void printStats(Collection<Alignment> alignments) {
-		CorrelationAlignmentStats cStats = (CorrelationAlignmentStats) stats_;
-		// print gap frequency distribution
-		HashMap<Integer, Integer> gapFreqs = cStats.getGapFrequencies(alignments);
-		// System.out.println("gap frequencies: ");
-		printFormattedII("gapFreqs=", ";", gapFreqs);
-
-		// print offset distribution
-		HashMap<Double, Integer> offsets = cStats.getOffsetDistribution(alignments, .25);
-		// System.out.println("offset distribution: ");
-		printFormattedDI("offsetDist=", ";", offsets);
-
-		// print score distribution
-		HashMap<Double, Integer> scoreDist = cStats.getScoreDistribution(alignments, 0.05, f_);
-		// System.out.println("score distribution: ");
-		printFormattedDI("scoreDist=", ";", scoreDist);
-
-		// print gap open distribution
-		double[] gapOpenFreqs = cStats.getGapOpenPositionFreqs(alignments, 0, seqLength_ + 5);
-		String str = Arrays.toString(gapOpenFreqs);
-		str = str.substring(1, str.length() - 1);
-		str = "gapOpenDist= {" + str + "};";
-		str.replace(']', '}');
-		// System.out.println("gap open distribution: ");
-		System.out.println(str);
-
-	}
-
 	/**
-	 * get all alignments for sequences read in by sequence reader
+	 * get all alignments for sequences read in by sequence reader uses max
+	 * number of threads to do this...
+	 * 
 	 * 
 	 * @return
 	 */
 	public List<Alignment> getAlignments() {
-		List<Alignment> alignments = new ArrayList<>();
+
 		List<Sequence> encoded = loadSequences();
-		seqLength_ = encoded.get(0).length();
+		boolean[] safeElts = new boolean[encoded.size()];
+		List<Pair<Integer, Integer>> pairs = new ArrayList<>();
 
 		for (int i = 0; i < encoded.size(); i++) {
-			Sequence s = encoded.get(i);
-			if (Utilities.VERBOSE) {
-				System.out.println("getting alignments for " + s.getID());
-			}
 			for (int j = i + 1; j < encoded.size(); j++) {
-				Sequence t = encoded.get(j);
-
-				alignments.add(a_.getAlignment(s, t, f_));
+				Pair<Integer, Integer> p = new Pair<>();
+				p.put(i, j);
+				pairs.add(p);
 			}
 		}
-		return alignments;
+
+		ThreadSafeAlignmentAdder adder = new ThreadSafeAlignmentAdder(pairs, safeElts, encoded);
+		int maxThreads = Runtime.getRuntime().availableProcessors();
+		CountDownLatch latch = new CountDownLatch(maxThreads);
+		for (int i = 0; i < maxThreads; i++) {
+			NotifyingThread t = new AlignmentGetter(adder, a_.clone(), f_.clone(), i, latch);
+			t.start();
+		}
+
+		try {
+			latch.await();
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		} // Wait for countdown
+
+		System.out.println("returned!!");
+
+		return adder.getAlignments();
 
 	}
 
@@ -126,17 +92,34 @@ public class AlignmentGenerator {
 		}
 		int idx = 1;
 		for (Alignment al : als) {
-			if (Utilities.VERBOSE) {
-				System.out.println("Alignment " + idx + ":");
-			}
+
 			if (Utilities.TESTMODE) {
 				if (idx > Utilities.MAX_ALIGNMENTS) {
 					break;
 				}
 			}
-			idx++;
-			al.printAlignment();
-			System.out.println("score: " + f_.getScore(al));
+			if (Utilities.TESTMODE) {
+				double score = f_.getScore(al);
+				if (score < 0) {
+					System.out.println("Alignment " + idx + ":");
+
+					idx++;
+
+					al.printAlignment();
+					System.out.println("temp score: " + al.tempScore_);
+					System.out.println("score: " + f_.getScore(al));
+				}
+			} else {
+				double score = f_.getScore(al);
+				System.out.println("Alignment " + idx + ":");
+
+				idx++;
+
+				al.printAlignment();
+				System.out.println("temp score: " + al.tempScore_);
+				System.out.println("score: " + f_.getScore(al));
+			}
+
 		}
 	}
 
@@ -171,7 +154,146 @@ public class AlignmentGenerator {
 			}
 			count++;
 		}
+	
 		return encoded;
+	}
+
+	public abstract class NotifyingThread extends Thread {
+		private final Set<ThreadCompleteListener> listeners = new CopyOnWriteArraySet<ThreadCompleteListener>();
+
+		public final void addListener(final ThreadCompleteListener listener) {
+			listeners.add(listener);
+		}
+
+		public final void removeListener(final ThreadCompleteListener listener) {
+			listeners.remove(listener);
+		}
+
+		private final void notifyListeners() {
+			for (ThreadCompleteListener listener : listeners) {
+				listener.notifyOfThreadComplete(this);
+			}
+		}
+
+		@Override
+		public final void run() {
+			try {
+				doRun();
+			} finally {
+				notifyListeners();
+			}
+		}
+
+		public abstract void doRun();
+	}
+
+	public class AlignmentGetter extends NotifyingThread {
+		ThreadSafeAlignmentAdder a_;
+		Aligner al_;
+		ScoreFunction f_;
+		int idx_;
+		CountDownLatch l_;
+
+		public AlignmentGetter(ThreadSafeAlignmentAdder a, Aligner al, ScoreFunction f, int idx, CountDownLatch l) {
+			a_ = a;
+			al_ = al;
+			f_ = f;
+			idx_ = idx;
+			l_ = l;
+		}
+
+		public String toString() {
+
+			return "" + idx_;
+		}
+
+		@Override
+		public void doRun() {
+			Pair<Integer, Integer> job = null;
+			while (a_.getNumJobs() > 0) {
+				job = a_.take(job);
+				if (job != null) {
+					Pair<Sequence, Sequence> seqs = a_.getSequences(job);
+					Alignment alignment = al_.getAlignment(seqs.getFirst(), seqs.getSecond(), f_);
+					if (Utilities.VERBOSE) {
+						if (Math.random() < 0.001) {
+							System.out
+									.println("thread: " + idx_ + " getting alignments for " + seqs.getFirst().getID());
+							System.out.println("num left: " + a_.getNumJobs());
+						}
+					}
+					a_.addAlignment(alignment);
+				}
+
+			}
+			l_.countDown();
+
+		}
+
+	}
+
+	public class ThreadSafeAlignmentAdder {
+
+		private List<Pair<Integer, Integer>> list_;
+		private List<Alignment> alignments_;
+		private List<Sequence> toAlign_;
+		private boolean[] safeElts_;
+		private int capacity;
+
+		public ThreadSafeAlignmentAdder(List<Pair<Integer, Integer>> list, boolean[] safeElts, List<Sequence> toAlign) {
+			list_ = list;
+			toAlign_ = toAlign;
+			safeElts_ = safeElts;
+			alignments_ = new ArrayList<>();
+			shuffle();
+		}
+
+		public void shuffle() {
+			Collections.shuffle(list_);
+		}
+
+		public int getNumJobs() {
+			return list_.size();
+		}
+
+		public synchronized void add(Pair<Integer, Integer> element) {
+			list_.add(element);
+		}
+
+		public synchronized Pair<Integer, Integer> take(Pair<Integer, Integer> lastTook) {
+			if (lastTook != null) {
+				safeElts_[lastTook.getFirst()] = false;
+				safeElts_[lastTook.getSecond()] = false;
+			}
+			Pair<Integer, Integer> toTake = null;
+			int numToCheck = Math.min(list_.size(), 10);
+			for (int i = 1; i <= numToCheck; i++) {
+				Pair<Integer, Integer> p = list_.get(list_.size() - i);
+				if (!safeElts_[p.getFirst()] && !safeElts_[p.getFirst()]) {
+					safeElts_[p.getFirst()] = true;
+					safeElts_[p.getSecond()] = true;
+					toTake = p;
+					list_.remove(list_.size() - i);
+					break;
+				}
+			}
+			return toTake;
+
+		}
+
+		public List<Alignment> getAlignments() {
+			return alignments_;
+		}
+
+		public synchronized void addAlignment(Alignment a) {
+			alignments_.add(a);
+		}
+
+		public Pair<Sequence, Sequence> getSequences(Pair<Integer, Integer> toGet) {
+			Pair<Sequence, Sequence> p = new Pair<>();
+			p.put(toAlign_.get(toGet.getFirst()), toAlign_.get(toGet.getSecond()));
+			return p;
+		}
 	}
 
 }

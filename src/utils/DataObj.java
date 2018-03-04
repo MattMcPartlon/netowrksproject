@@ -7,5 +7,7 @@ public abstract class DataObj {
 	public abstract DataObj clone();
 
 	public abstract boolean equals(Object o);
+	
+	public abstract String toString();
 
 }

@@ -11,17 +11,74 @@ public class Alignment {
 
 	Sequence s1_, s2_, origS1_, origS2_;
 	int startIndexs1_ = 1, startIndexs2_ = 1;
-	double numGaps_ = -1;
+	int numGaps_ = -1;
+	AlignmentType alignmentType_;
+	double tempScore_, score_ = Integer.MIN_VALUE, avgOffset_ = Integer.MIN_VALUE;
 
 	public Alignment() {
 	}
 
-	public Alignment(Sequence s1, Sequence s2, Sequence os1, Sequence os2) {
+	public Alignment(Sequence s1, Sequence s2, Sequence os1, Sequence os2, AlignmentType t) {
 		s1_ = s1;
 		origS1_ = os1.deepCopy();
 		s2_ = s2;
 		origS2_ = os2.deepCopy();
 		setAligned(s1_, s2_);
+		alignmentType_ = t;
+	}
+
+	public boolean scoreSetQ() {
+		return score_ != Integer.MIN_VALUE;
+	}
+
+	public boolean averageOffsetSetQ() {
+		return avgOffset_ != Integer.MIN_VALUE;
+	}
+
+	public void setTempScore(double score) {
+		tempScore_ = score;
+	}
+
+	public void setScore(double score) {
+
+		score_ = score;
+	}
+
+	public double getScore() {
+		if (score_ == Integer.MIN_VALUE) {
+			throw new IllegalAccessError("average offset has not been computed for this alignment");
+		}
+		return score_;
+	}
+
+	public void setNumGaps(int numGaps) {
+		numGaps_ = numGaps;
+	}
+
+	public void setAverageOffset(double avgOffset) {
+		avgOffset_ = avgOffset;
+	}
+
+	public boolean numGapsSetQ() {
+		return numGaps_ != -1;
+	}
+
+	public double getAverageOffset(Sequence s) {
+		if (avgOffset_ == Integer.MIN_VALUE) {
+			throw new IllegalAccessError("average offset has not been computed for this alignment");
+		}
+		if (s.equals(s1_)) {
+			return avgOffset_;
+		} else if (s.equals(s2_)) {
+			return -1 * avgOffset_;
+		} else {
+			throw new IllegalArgumentException("sequence s: " + s.toString() + " is not part of this alignment");
+		}
+
+	}
+
+	public AlignmentType getAlignmentType() {
+		return alignmentType_;
 	}
 
 	public int getOrigS1Length() {
@@ -32,43 +89,10 @@ public class Alignment {
 		return origS2_.length();
 	}
 
-	public double getNumGaps() {
-		// originally we initialize num gaps to be -1, so if we have not already
-		// computed the number of gaps, we enter if and compute, otherwise, we
-		// return the previously computed answer
-		int numGapsS = 0;
-		int numGapsT = 0;
-		if (numGaps_ == -1) {
-			// initially there are no gaps
-			numGaps_ = 0;
-			// to store pairs of symbols in sequence
-			Element[] p = null;
-			// for each pair of symbols in alignment, check pair for gap symbol
-			for (int i = 1; i <= this.length(); i++) {
-				// get the pair of elements aligned at position i
-				p = this.pairAt(i);
-
-				// increment numGaps_ if pair aligned at position i contains the
-				// gap symbol
-				numGapsS += this.getS1().get(i).equals(Element.gap) ? 1 : 0;
-				numGapsT += this.getS2().get(i).equals(Element.gap) ? 1 : 0;
-				numGaps_ += (p[0] == Element.gap || p[1] == Element.gap) ? 1 : 0;
-			}
+	public int getNumGaps() {
+		if (!this.numGapsSetQ()) {
+			throw new IllegalAccessError("num gaps has not been set");
 		}
-		// error checking
-		boolean cS = getS1().length() - numGapsS == origS1_.length();
-		boolean cT = getS2().length() - numGapsT == origS2_.length();
-		if (!cS | !cT) {
-			System.out.println("alighment length: " + this.length());
-			System.out.println("original length of s1: : " + origS1_.length());
-			System.out.println("num gaps in s1: " + numGapsS);
-			System.out.println("diff: " + (getS1().length() - numGapsS));
-			System.out.println("original length of s2 : " + origS2_.length());
-			System.out.println("num gaps in s2: " + numGapsT);
-			System.out.println("diff: " + (getS2().length() - numGapsT));
-			throw new IllegalArgumentException("error!");
-		}
-
 		return numGaps_;
 	}
 

@@ -129,7 +129,7 @@ public class NWGlobalAligner extends NWAligner {
 
 		aT.reverseOrder();
 		aS.reverseOrder();
-		return new Alignment(aS, aT, s_, t_);
+		return new Alignment(aS, aT, s_, t_, AlignmentType.NWGlobal);
 
 	}
 
@@ -173,6 +173,12 @@ public class NWGlobalAligner extends NWAligner {
 	@Override
 	public String toString() {
 		return "global NW aligner";
+	}
+
+	@Override
+	public Aligner clone() {
+		// TODO Auto-generated method stub
+		return new NWGlobalAligner();
 	}
 
 }

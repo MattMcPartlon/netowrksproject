@@ -4,11 +4,11 @@ import scoring.ScoreFunction;
 import sequence.Element;
 import sequence.Sequence;
 
-public class NWLocalAligner extends NWAligner {
+public  class NWLocalAligner extends NWAligner {
 
 	@Override
 	public double getAlignmentScore() {
-		double best = Double.MIN_VALUE;
+		double best = Integer.MIN_VALUE;
 		int m, n;
 		m = s_.length();
 		n = t_.length();
@@ -21,7 +21,7 @@ public class NWLocalAligner extends NWAligner {
 	}
 
 	private int[] getBestIndex() {
-		double best = Double.MIN_VALUE;
+		double best = Integer.MIN_VALUE;
 		int m, n;
 		m = s_.length();
 		n = t_.length();
@@ -110,7 +110,7 @@ public class NWLocalAligner extends NWAligner {
 		aT.reverseOrder();
 		aS.reverseOrder();
 
-		Alignment a = new Alignment(aS, aT, s_, t_);
+		Alignment a = new Alignment(aS, aT, s_, t_, AlignmentType.NWLocal);
 		a.startIndexs1_ = prev[0];
 		a.startIndexs2_ = prev[1];
 		return a;
@@ -163,6 +163,12 @@ public class NWLocalAligner extends NWAligner {
 	@Override
 	public String toString() {
 		return "local NW aligner";
+	}
+
+	@Override
+	public Aligner clone() {
+		// TODO Auto-generated method stub
+		return new NWLocalAligner();
 	}
 
 }

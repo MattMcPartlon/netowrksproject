@@ -43,6 +43,7 @@ public class NYSEDatReader extends SReader {
 		if (Utilities.VERBOSE) {
 			System.out.println("reading NYSE data");
 		}
+		
 		try {
 			Scanner s = new Scanner(toRead_);
 			// skip header

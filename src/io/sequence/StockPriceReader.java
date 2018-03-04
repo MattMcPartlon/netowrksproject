@@ -58,6 +58,7 @@ public class StockPriceReader extends SReader {
 							Integer.parseInt(end[2]));
 
 					Company c = Utilities.findCompany(company);
+					
 					DataObj dat = new StockDataObj(c, startTime, endTime, EncodingType.RawPrices);
 
 					Sequence seq = new Sequence(dat);

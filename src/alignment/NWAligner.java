@@ -117,6 +117,8 @@ public abstract class NWAligner extends Aligner {
 		}
 
 	}
+	
+
 
 	protected void initializeFirstColVal(int mat, int val) {
 		if (s_.length() != getMatrix(mat)[0].length - 1) {

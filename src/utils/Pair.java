@@ -25,4 +25,7 @@ public class Pair<F, S> {
 		second_ = second;
 	}
 
+	public boolean contains(Object o) {
+		return first_.equals(o) || second_.equals(o);
+	}
 }

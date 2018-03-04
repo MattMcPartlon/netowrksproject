@@ -51,9 +51,9 @@ public class CorrelationWindowEncoder extends CorrelationEncoder {
 		double[] movingAvgs = getMovingAverages(toEncode);
 		Sequence encoded = new Sequence(new StockDataObj((StockDataObj) toEncode.getData(), this.getEncodingType()));
 		for (int i = 1; i < movingAvgs.length; i++) {
-			double val = (toEncode.getVal(i + window_) - movingAvgs[i]) / (1+Math.pow(movingVars[i], 0.5));
-			double transformed=Math.signum(val)*(Math.log(Math.abs(val)+1));
-			encoded.add(new Element(getLabel(transformed), i + 1, "correlation window encoded value", transformed));
+			double val = (toEncode.getVal(i + window_)-movingAvgs[i]) / Math.sqrt(movingVars[i]);
+			double transformed=Math.signum(val)*(Math.log(1+Math.abs(val)));
+			encoded.add(new Element(getLabel(transformed), i , "correlation window encoded value", transformed));
 		}
 		return encoded;
 	}

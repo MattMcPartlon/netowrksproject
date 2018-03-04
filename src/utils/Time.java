@@ -20,7 +20,7 @@ public class Time implements Comparable<Time> {
 	}
 
 	public String toString() {
-		return year_ + "-" + month_ + "-" + day_;
+		return year_ + "_" + month_ + "_" + day_;
 	}
 
 	@Override

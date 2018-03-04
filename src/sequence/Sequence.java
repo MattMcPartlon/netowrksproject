@@ -102,4 +102,13 @@ public class Sequence {
 		return new Sequence(this);
 	}
 
+	public boolean equals(Object o) {
+		if (o instanceof Sequence) {
+			Sequence s = (Sequence) o;
+			return s.getData().equals(this.getData())&&this.length()==s.length();
+		}
+		return false;
+
+	}
+
 }

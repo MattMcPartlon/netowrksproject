@@ -17,10 +17,10 @@ public class Company implements Comparable<Company> {
 	}
 
 	public Company(String symbol) {
-		ticker_ = symbol;
+		ticker_ = symbol.trim();
 	}
-	
-	public int getSectorID(){
+
+	public int getSectorID() {
 		return sector_.getID();
 	}
 
@@ -31,10 +31,24 @@ public class Company implements Comparable<Company> {
 	public String getSymbol() {
 		return ticker_;
 	}
+	
+	public String toString(){
+		return "ticker: "+this.ticker_+", sector: "+this.sector_;
+	}
 
 	@Override
 	public int compareTo(Company o) {
 		return o.getSymbol().compareTo(this.getSymbol());
+	}
+
+	public boolean equals(Object o) {
+		if (o instanceof Company) {
+			Company other = (Company) o;
+			boolean b1=this.ticker_.toLowerCase().contains(other.getSymbol().toLowerCase());
+			boolean b2=other.getSymbol().toLowerCase().contains(this.ticker_.toLowerCase());
+			return b1||b2;
+		}
+		return false;
 	}
 
 }

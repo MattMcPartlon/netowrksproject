@@ -1,9 +1,10 @@
 package network;
 
+import utils.Company;
 import utils.DataObj;
 import utils.StockDataObj;
 
-public class VertexDataObject extends DataObj {
+public  class VertexDataObject extends DataObj {
 
 	int index_;
 	StockDataObj dat_;
@@ -21,6 +22,10 @@ public class VertexDataObject extends DataObj {
 
 	public int getSectorID() {
 		return dat_.getCompany().getSectorID();
+	}
+	
+	public Company getCompany(){
+		return dat_.getCompany();
 	}
 
 	public void setIndex(int index) {
@@ -53,5 +58,10 @@ public class VertexDataObject extends DataObj {
 	public int hashCode() {
 		return this.dat_.getID().hashCode();
 
+	}
+
+	@Override
+	public String toString() {
+		return "company: "+getCompany().toString()+"index: "+index_;
 	}
 }

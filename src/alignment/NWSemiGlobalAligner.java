@@ -1,39 +1,52 @@
 package alignment;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.PrintWriter;
+import java.util.Arrays;
+
+import javax.rmi.CORBA.Util;
+
 import scoring.ScoreFunction;
 import sequence.Element;
 import sequence.Sequence;
+import utils.Utilities;
 
 public class NWSemiGlobalAligner extends NWAligner {
 
 	@Override
 	public double getAlignmentScore() {
-		double best = Double.MIN_VALUE;
+		double best = Integer.MIN_VALUE;
 		int m, n;
 		m = s_.length();
 		n = t_.length();
 
 		// check over bottom row
-		for (int i = 0; n - i > 0; i++) {
+		for (int i = 0; (n - i) >= (n - Utilities.MAX_LAG); i++) {
 			best = getVal(A, m, n - i) > best ? getVal(A, m, n - i) : best;
 		}
-		for (int i = 0; m - i > 0; i++) {
+		for (int i = 0; (m - i) >= (m - Utilities.MAX_LAG); i++) {
 			best = getVal(A, m - i, n) > best ? getVal(A, m - i, n) : best;
 		}
+
 		return best;
 	}
 
 	private int[] getBestIndex() {
-		double best = Double.MIN_VALUE, val = -1;
+		double best = Integer.MIN_VALUE;
+		double val=0;
 		int m, n;
 		m = s_.length();
 		n = t_.length();
-		int[] bestIndex = new int[] { 0, 0 };
+		
+		
+		int[] bestIndex = new int[] { m, n };
 
 		// find best entry such that s[m] aligned with t[n-i] (i.e. rest of t
 		// aligned to gap)
-		for (int i = 0; n - i > 0; i++) {
+		for (int i = 0; (n - i) >= (n - Utilities.MAX_LAG); i++) {
 			val = getVal(A, m, n - i);
+			
 			if (val > best) {
 				best = val;
 				bestIndex = new int[] { m, n - i };
@@ -41,24 +54,31 @@ public class NWSemiGlobalAligner extends NWAligner {
 		}
 		// find best entry such that s[m-i] aligned with t[n] (i.e. rest of s
 		// aligned to gap)
-		for (int i = 0; m - i > 0; i++) {
+		for (int i = 0; (m - i) >= (m - Utilities.MAX_LAG); i++) {
 			val = getVal(A, m - i, n);
+			
 			if (val > best) {
 				best = val;
 				bestIndex = new int[] { m - i, n };
 			}
 		}
+
 		return bestIndex;
 	}
 
 	public Alignment doTraceback() {
 		Sequence aS, aT;
+
 		aS = new Sequence(s_.getData());
 		aT = new Sequence(t_.getData());
 		// figure out which entry of A we are starting from
 		int[] index = getBestIndex();
 		int i = index[0], j = index[1], m = s_.length(), n = t_.length(), current = A;
 		// if i<m then t[n] is aligned to s[i] and s[i+1]...s[m] aligned to gap
+		double tempScore = getVal(A, i, j);
+		if (tempScore == 0.0) {
+			System.out.println("i: " + i + ", j: " + j);
+		}
 		for (int k = m; k > i; k--) {
 			aS.add(s_.get(k));
 			aT.add(Element.gap);
@@ -126,7 +146,29 @@ public class NWSemiGlobalAligner extends NWAligner {
 		aT.reverseOrder();
 		aS.reverseOrder();
 
-		return new Alignment(aS, aT, s_, t_);
+		Alignment a = new Alignment(aS, aT, s_, t_, AlignmentType.NWSemiGlobal);
+		a.setTempScore(tempScore);
+
+		if (Utilities.TESTMODE) {
+			try {
+
+				if (tempScore == 0.0) {
+					PrintWriter pw = new PrintWriter(new File("temp.txt"));
+					for (int k = 0; k <= n; k++) {
+						for (int l = 0; l < n; l++) {
+							pw.print(getVal(A, k, l) + " ");
+						}
+						pw.println();
+					}
+				}
+			} catch (FileNotFoundException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+
+		}
+		return a;
+
 	}
 
 	/**
@@ -146,14 +188,29 @@ public class NWSemiGlobalAligner extends NWAligner {
 	public void initializeB() {
 		setVal(B, 0, 0, 0);
 		initializeFirstColVal(B, Integer.MIN_VALUE);
+
+		// initializeFirstRowVal(B, 0);
+		for (int i = 1; i <= t_.length(); i++) {
+			if (i <= Utilities.MAX_LAG) {
+				setVal(B, 0, i, 0);
+			} else {
+				setVal(B, 0, i, Integer.MIN_VALUE);
+			}
+		}
 		initializeFirstRowBackPointer(B, B);
-		initializeFirstRowVal(B, 0);
 	}
 
 	@Override
 	public void initializeC() {
 		setVal(C, 0, 0, 0);
-		initializeFirstColVal(C, 0);
+		for (int i = 1; i <= t_.length(); i++) {
+			if (i <= Utilities.MAX_LAG) {
+				setVal(C, i, 0, 0);
+			} else {
+				setVal(C, i, 0, Integer.MIN_VALUE);
+			}
+		}
+
 		initializeFirstColBackPointer(C, C);
 		initializeFirstRowVal(C, Integer.MIN_VALUE);
 	}
@@ -188,6 +245,12 @@ public class NWSemiGlobalAligner extends NWAligner {
 	@Override
 	public String toString() {
 		return "semi global NW aligner";
+	}
+
+	@Override
+	public Aligner clone() {
+		// TODO Auto-generated method stub
+		return new NWSemiGlobalAligner();
 	}
 
 }

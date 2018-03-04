@@ -13,7 +13,7 @@ public class CorrelationScoreFunction extends ScoreFunction {
 
 	@Override
 	public double getSubScore(Element e1, Element e2) {
-		if(e1==Element.gap||e2==Element.gap){
+		if (e1 == Element.gap || e2 == Element.gap) {
 			throw new IllegalArgumentException("can't get substitution score of gap element!");
 		}
 		return e1.getVal() * e2.getVal();
@@ -22,39 +22,50 @@ public class CorrelationScoreFunction extends ScoreFunction {
 	@Override
 	public double getScore(Alignment a) {
 		// TODO Auto-generated method stub
-		
-		return getRawScore(a) / (a.length() - 1.0);
+		if (!a.scoreSetQ()) {
+			double score = getRawScore(a) / (a.length() - 1.0);
+			a.setScore(score);
+		}
+		return a.getScore();
 	}
-	
+
 	/**
 	 * Gets the substitution score of (-)e1 an e2
+	 * 
 	 * @param e1
 	 * @param e2
 	 * @return
 	 */
 	public double getSubScoreNeg1(Element e1, Element e2) {
-		if(e1==Element.gap||e2==Element.gap){
+		if (e1 == Element.gap || e2 == Element.gap) {
 			throw new IllegalArgumentException("can't get substitution score of gap element!");
 		}
-		return (-1)*e1.getVal() * e2.getVal();
+		return (-1) * e1.getVal() * e2.getVal();
 	}
 
 	/**
 	 * Gets the substitution score of e1 and (-)e2
+	 * 
 	 * @param e1
 	 * @param e2
 	 * @return
 	 */
 	public double getSubScoreNeg2(Element e1, Element e2) {
-		if(e1==Element.gap||e2==Element.gap){
+		if (e1 == Element.gap || e2 == Element.gap) {
 			throw new IllegalArgumentException("can't get substitution score of gap element!");
 		}
-		return e1.getVal() * (-1)*e2.getVal();
+		return e1.getVal() * (-1) * e2.getVal();
 	}
 
 	@Override
 	public String toString() {
 		// TODO Auto-generated method stub
-		return "correlation score function, open penalty: "+op_+" extend penalty: "+ep_;
+		return "correlation score function, open penalty: " + op_ + " extend penalty: " + ep_;
+	}
+
+	@Override
+	public ScoreFunction clone() {
+
+		return new CorrelationScoreFunction(op_, ep_);
 	}
 }

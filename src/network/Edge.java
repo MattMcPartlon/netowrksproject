@@ -1,22 +1,42 @@
 package network;
 
+import sequence.Sequence;
 import utils.Pair;
+import utils.StockDataObj;
 
 public abstract class Edge implements Comparable<Edge> {
 
 	Pair<Vertex, Vertex> endpts_;
 
 	public Edge(Vertex u, Vertex v) {
-		
+
 		endpts_ = new Pair<>();
 		endpts_.setFirst(u);
 		endpts_.setSecond(v);
 	}
 
+
 	public abstract double getWeight();
-	
+
 	public Vertex getU() {
 		return endpts_.getFirst();
+	}
+	
+	
+
+	public Vertex getOpposite(Vertex v) {
+		if (this.getU().equals(v)) {
+			if (!this.getV().equals(v)) {
+				return this.getV();
+			}
+		}
+		if (this.getV().equals(v)) {
+			if (!this.getU().equals(v)) {
+				return this.getU();
+			}
+		}
+
+		throw new IllegalArgumentException("v is not indicent to this edge");
 	}
 
 	public Vertex getV() {
