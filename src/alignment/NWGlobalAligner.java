@@ -180,5 +180,11 @@ public class NWGlobalAligner extends NWAligner {
 		// TODO Auto-generated method stub
 		return new NWGlobalAligner();
 	}
+	
+	@Override
+	public AlignmentType getAlignmentType() {
+		// TODO Auto-generated method stub
+		return AlignmentType.NWGlobal;
+	}
 
 }

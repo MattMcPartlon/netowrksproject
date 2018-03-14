@@ -8,16 +8,25 @@ public class Company implements Comparable<Company> {
 	double marketCap_;
 
 	public Company(String ticker, String name, double marketCap, Sector sec, Industry ind, Exchange ex) {
-		ticker_ = ticker.trim();
+		ticker_ = ticker.trim().toUpperCase();
 		name_ = name.trim();
 		marketCap_ = marketCap;
 		sector_ = sec;
 		industry_ = ind;
 		exchange_ = ex;
 	}
+	
+	public Company(String ticker, String name,  Sector sec, Exchange ex) {
+		ticker_ = ticker.trim().toUpperCase();
+		name_ = name.trim();
+	
+		sector_ = sec;
+		
+		exchange_ = ex;
+	}
 
 	public Company(String symbol) {
-		ticker_ = symbol.trim();
+		ticker_ = symbol.trim().toUpperCase();
 	}
 
 	public int getSectorID() {
@@ -34,6 +43,10 @@ public class Company implements Comparable<Company> {
 	
 	public String toString(){
 		return "ticker: "+this.ticker_+", sector: "+this.sector_;
+	}
+	
+	public int hashCode(){
+		return this.getSymbol().hashCode();
 	}
 
 	@Override

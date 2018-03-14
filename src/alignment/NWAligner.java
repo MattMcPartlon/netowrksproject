@@ -12,14 +12,13 @@ import sequence.Sequence;
  */
 public abstract class NWAligner extends Aligner {
 
-	
 	protected ScoreFunction f_;
 	protected Sequence s_, t_;
 	protected double E, O; // O is penalty for opening a gap, E is penalty for
 							// extending a gap
-	private double[][][] a_, b_, c_;
+	protected double[][][] a_, b_, c_;
 	protected final int A = 1, B = 2, C = 3, NONE = 0;
-	public boolean debug;
+	public boolean debug = false;
 	// the type of alignment being done, to be returned by getType() method
 	public static final int GLOBAL = 1, SEMI_GLOBAL = 2, LOCAL = 3;
 
@@ -108,6 +107,14 @@ public abstract class NWAligner extends Aligner {
 
 	}
 
+	protected int returnBest(int i, int j, double val, double a, double b, double c) {
+		if (i <= 1 || j <=1) {
+			return (val == b) ? B : (val == c) ? C : A;
+		} else {
+			return (val == a) ? A : (val == b) ? B : C;
+		}
+	}
+
 	protected void initializeFirstRowVal(int mat, int val) {
 		if (t_.length() != getMatrix(mat).length - 1) {
 			throw new IllegalArgumentException("logical error");
@@ -117,8 +124,6 @@ public abstract class NWAligner extends Aligner {
 		}
 
 	}
-	
-
 
 	protected void initializeFirstColVal(int mat, int val) {
 		if (s_.length() != getMatrix(mat)[0].length - 1) {
@@ -235,7 +240,8 @@ public abstract class NWAligner extends Aligner {
 
 		double val = max(a, b, c);
 		setVal(B, i, j, val);
-		return (val == a) ? A : (val == b) ? B : C;
+		return returnBest(i, j, val, a, b, c);
+
 	}
 
 	/**
@@ -255,7 +261,7 @@ public abstract class NWAligner extends Aligner {
 		double val = max(a, b, c);
 		setVal(C, i, j, val);
 
-		return (val == a) ? A : (val == b) ? B : C;
+		return returnBest(i, j, val, a, b, c);
 	}
 
 	/**

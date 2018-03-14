@@ -17,6 +17,11 @@ public class WeightedEdge extends Edge {
 		// TODO Auto-generated constructor stub
 	}
 
+	public double getAvgGaps() {
+		CorrelationAlignmentStats stats = new CorrelationAlignmentStats();
+		return stats.getNumGaps(a_);
+	}
+
 	public double getAvgGapOffset(Vertex u) {
 		if (!endpts_.contains(u)) {
 			throw new IllegalArgumentException("u is not incidednt to this edge!");

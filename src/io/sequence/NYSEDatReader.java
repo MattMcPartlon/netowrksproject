@@ -5,8 +5,10 @@ import java.io.FileNotFoundException;
 import java.security.KeyStore.Entry.Attribute;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Scanner;
 
@@ -43,7 +45,7 @@ public class NYSEDatReader extends SReader {
 		if (Utilities.VERBOSE) {
 			System.out.println("reading NYSE data");
 		}
-		
+
 		try {
 			Scanner s = new Scanner(toRead_);
 			// skip header
@@ -92,4 +94,5 @@ public class NYSEDatReader extends SReader {
 
 	}
 
+	
 }

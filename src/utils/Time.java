@@ -22,6 +22,10 @@ public class Time implements Comparable<Time> {
 	public String toString() {
 		return year_ + "_" + month_ + "_" + day_;
 	}
+	
+	public String toList() {
+		return "{"+year_ + "," + month_ + "," + day_+"}";
+	}
 
 	@Override
 	public int compareTo(Time o) {

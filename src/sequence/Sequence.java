@@ -42,7 +42,18 @@ public class Sequence {
 	}
 
 	public Element get(int pos) {
+		if(pos>this.length()||pos<1){
+			throw new IllegalArgumentException("pos must be >0 and less than length = "+this.length()+" got pos: "+pos);
+		}
+		try{
 		return seq_.get(pos - 1);
+		}catch(Exception e){
+			System.out.println("exception caught");
+			System.out.println("got pos: "+pos);
+			System.out.println("seq: "+seq_.toString());
+			System.exit(0);
+		}
+		return null;
 	}
 
 	public int length() {

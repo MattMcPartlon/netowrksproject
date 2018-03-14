@@ -18,6 +18,13 @@ public class Alignment {
 	public Alignment() {
 	}
 
+	public Alignment(Sequence s1, Sequence s2, AlignmentType t) {
+		s1_ = s1;
+		s2_ = s2;
+		setAligned(s1_, s2_);
+		alignmentType_ = t;
+	}
+
 	public Alignment(Sequence s1, Sequence s2, Sequence os1, Sequence os2, AlignmentType t) {
 		s1_ = s1;
 		origS1_ = os1.deepCopy();
@@ -223,5 +230,6 @@ public class Alignment {
 			System.out.println(s2_.getID() + " : " + s2_.toString());
 		}
 	}
+	
 
 }

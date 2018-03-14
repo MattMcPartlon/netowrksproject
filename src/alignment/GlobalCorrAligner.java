@@ -138,6 +138,12 @@ public class GlobalCorrAligner extends CorrAligner {
 		return new GlobalCorrAligner();
 	}
 
+	@Override
+	public AlignmentType getAlignmentType() {
+		// TODO Auto-generated method stub
+		return AlignmentType.GlobalCorr;
+	}
+
 	
 	
 

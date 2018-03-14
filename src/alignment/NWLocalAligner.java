@@ -170,5 +170,11 @@ public  class NWLocalAligner extends NWAligner {
 		// TODO Auto-generated method stub
 		return new NWLocalAligner();
 	}
+	
+	@Override
+	public AlignmentType getAlignmentType() {
+		// TODO Auto-generated method stub
+		return AlignmentType.NWLocal;
+	}
 
 }

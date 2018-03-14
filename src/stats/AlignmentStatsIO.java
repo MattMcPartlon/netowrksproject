@@ -29,23 +29,50 @@ public class AlignmentStatsIO {
 	public void saveAlignmentStats(File f) {
 		CorrelationAlignmentStats cStats = new CorrelationAlignmentStats();
 		// print gap frequency distribution
+		if(Utilities.VERBOSE){
+			System.out.println("getting gap frequencies");
+			
+		}
 		HashMap<Integer, Integer> gapFreqs = cStats.getGapFrequencies(alignments_);
 		// System.out.println("gap frequencies: ");
 		String gapFreqsStr = getFormattedII("", "", gapFreqs);
+		
+		if(Utilities.VERBOSE){
+			System.out.println("got gap frequency dist.");
+			System.out.println("getting offset dist.");
+			
+		}
 
 		// print offset distribution
 		HashMap<Double, Integer> offsets = cStats.getOffsetDistribution(alignments_, .25);
 		// System.out.println("offset distribution: ");
 		String offsetDistStr = getFormattedDI("", "", offsets);
+		
+		if(Utilities.VERBOSE){
+			System.out.println("got gap offset dist.");
+			System.out.println("getting score dist.");
+			
+		}
 
+		
 		// print score distribution
 		HashMap<Double, Integer> scoreDist = cStats.getScoreDistribution(alignments_, 0.05, f_);
 		// System.out.println("score distribution: ");
 		String scoreDistStr = getFormattedDI("", "", scoreDist);
+		if(Utilities.VERBOSE){
+			System.out.println("got score dist.");
+			System.out.println("getting gap open freq dist.");
+			
+		}
 
 		// print gap open distribution
 		double[] gapOpenFreqs = cStats.getGapOpenPositionFreqs(alignments_, numGroups_);
 		String gapOpenFreqsStr = Utilities.mathematicaFormattedArray(gapOpenFreqs);
+		
+		if(Utilities.VERBOSE){
+			System.out.println("got gap open freq dist.");
+			System.out.println("writing to file...");
+		}
 
 		try {
 			PrintWriter pw = new PrintWriter(f);
@@ -57,6 +84,10 @@ public class AlignmentStatsIO {
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+		}
+		
+		if(Utilities.VERBOSE){
+			System.out.println("write to file!");
 		}
 
 	}

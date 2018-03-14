@@ -10,7 +10,7 @@ public class SimpleCorrelationEncoder extends CorrelationEncoder {
 		Sequence seq = new Sequence(new StockDataObj((StockDataObj) s.getData(), getEncodingType()));
 
 		for (int j = 1; j <= s.length(); j++) {
-			String str;
+			
 			double mean = getMean(1, s.length(), seq);
 			double sd = Math.pow(getVariance(1, s.length(), seq), .5);
 			double val = (s.getVal(j) - mean) / sd;

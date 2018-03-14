@@ -11,17 +11,19 @@ import java.util.Scanner;
 import java.util.TreeSet;
 import java.util.regex.Pattern;
 
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter.DEFAULT;
+
 public class Utilities {
 
 	public static boolean DEBUG = false;
 	public static boolean TESTMODE = true;
 	public static boolean VERBOSE = true;
 	public static int MAX_ALIGNMENTS = 45000;
-	public static int MAX_SEQS=1000;
-	public static int MAX_LAG=7;
-	
+	public static int MAX_SEQS = 500;
+	public static int MAX_LAG = 5;
+	public static int MaxThreads = Runtime.getRuntime().availableProcessors() - 4;
 	public static int open = 2, close = 3, low = 4, high = 5, volume = 6;
-	public static boolean Randomized=true;
+	public static boolean Randomized = false;
 	public static List<Company> companies_ = new ArrayList<>();
 	public static Sector[] sectors_ = new Sector[] { Sector.CapitalGoods, Sector.ConsumerDurables,
 			Sector.ConsumerNonDurables, Sector.ConsumerServices, Sector.Energy, Sector.Financial, Sector.Healthcare,
@@ -72,6 +74,31 @@ public class Utilities {
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		}
+		String fileString = "C:/Users/matt/Desktop/StockDat/s_and_p_data_2006_2015.csv";
+		data = new File(fileString);
+		try {
+			Scanner s = new Scanner(data);
+			Exchange ex = Exchange.NYSE;
+			// skip header
+			s.nextLine();
+			while (s.hasNextLine()) {
+
+				String[] line = s.nextLine().split(",(?=([^\"]*\"[^\"]*\")*[^\"]*$)");
+				if (DEBUG) {
+					System.out.println("parsing: " + Arrays.toString(line));
+				}
+				int symbol = 3, sector = 10, name = 4;
+
+				Sector sec = findSector(Integer.parseInt(line[sector]));
+				
+				String companyName = line[name].replace('"', ' ');
+				Company c = new Company(line[symbol], companyName, sec, ex);
+				companies_.add(c);
+			}
+
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		}
 
 	}
 
@@ -84,6 +111,36 @@ public class Utilities {
 		}
 
 		throw new IllegalArgumentException("can't find exchange: " + exchange);
+	}
+
+	public static Sector findSector(int sector) {
+		switch (sector) {
+		case 10:
+			return Sector.Energy;
+		case 15:
+			return Sector.Materials;
+		case 20:
+			return Sector.Industrials;
+		case 25:
+			return Sector.ConsumerDiscretionary;
+		case 30:
+			return Sector.ConsumerStaples;
+		case 35:
+			return Sector.Healthcare;
+		case 40:
+			return Sector.Financial;
+		case 45:
+			return Sector.Technology;
+		case 50:
+			return Sector.TeleCommunication;
+		case 55:
+			return Sector.PublicUtilities;
+		case 60:
+			return Sector.RealEstate;
+		default:
+			throw new IllegalArgumentException("can't find sector: " + sector);
+
+		}
 	}
 
 	public static Sector findSector(String sector) {
@@ -102,13 +159,13 @@ public class Utilities {
 		return "{" + str + "}";
 
 	}
-	
+
 	public static Company findCompany(String symbol) {
 		int idx = Collections.binarySearch(companies_, new Company(symbol));
 		if (idx < 0) {
 			if (VERBOSE) {
-				System.out.println("can't find company: "+symbol);
-				
+				System.out.println("can't find company: " + symbol);
+
 			}
 			return null;
 		}

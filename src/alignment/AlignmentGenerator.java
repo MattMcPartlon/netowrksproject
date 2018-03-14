@@ -55,6 +55,7 @@ public class AlignmentGenerator {
 	public List<Alignment> getAlignments() {
 
 		List<Sequence> encoded = loadSequences();
+
 		boolean[] safeElts = new boolean[encoded.size()];
 		List<Pair<Integer, Integer>> pairs = new ArrayList<>();
 
@@ -64,6 +65,9 @@ public class AlignmentGenerator {
 				p.put(i, j);
 				pairs.add(p);
 			}
+		}
+		if (Utilities.VERBOSE) {
+			System.out.println("num encoded seqs: " + encoded.size());
 		}
 
 		ThreadSafeAlignmentAdder adder = new ThreadSafeAlignmentAdder(pairs, safeElts, encoded);
@@ -148,13 +152,14 @@ public class AlignmentGenerator {
 			Sequence enc = e_.encode(toEncode);
 			encoded.add(enc);
 			if (Utilities.VERBOSE) {
-				System.out.println(e_.getDescription() + " encoding for: " + toEncode.getID());
+				System.out.println(e_.getDescription() + " encoding for: " + toEncode.getID() + " O= "
+						+ f_.getOpenPenalty() + ", E=" + f_.getExtendPenalty());
 				System.out.println("encoded: " + enc.toString());
 				System.out.println();
 			}
 			count++;
 		}
-	
+
 		return encoded;
 	}
 
@@ -222,7 +227,9 @@ public class AlignmentGenerator {
 							System.out.println("num left: " + a_.getNumJobs());
 						}
 					}
-					a_.addAlignment(alignment);
+					if (alignment.length() > 1) {
+						a_.addAlignment(alignment);
+					}
 				}
 
 			}

@@ -1,11 +1,12 @@
 package utils;
 
-
+import javax.security.auth.login.FailedLoginException;
 
 public class TradingDay implements Comparable<TradingDay> {
 
 		Time t_;
-		double open_, close_, volume_, low_, high_;
+		double open_, close_=-1, volume_, low_, high_;
+		boolean failed_=false;
 
 		public TradingDay(Time t, String open, String close, String low, String high, String volume) {
 			t_ = t;
@@ -15,11 +16,26 @@ public class TradingDay implements Comparable<TradingDay> {
 			high_ = Double.parseDouble(high);
 			volume_ = Double.parseDouble(volume);
 		}
+		
+		public TradingDay(Time t, String close){
+			t_=t;
+			try{
+			close_=Double.parseDouble(close);
+			}catch(Exception e){
+				failed_=true;
+			}
+		}
 
+		public boolean failed(){
+			return failed_;
+		}
+		
 		@Override
 		public int compareTo(TradingDay o) {
 			return this.t_.compareTo(o.t_);
 		}
+		
+		
 
 		public Time getTime() {
 			return t_;

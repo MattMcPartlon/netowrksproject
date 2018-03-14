@@ -1,5 +1,5 @@
 package alignment;
 
 public enum AlignmentType {
-	NWGlobal, NWSemiGlobal, NWLocal, GlobalCorr;
+	NWGlobal, NWSemiGlobal, NWLocal, GlobalCorr, Trivial;
 }

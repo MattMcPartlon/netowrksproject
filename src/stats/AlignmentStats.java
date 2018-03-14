@@ -1,16 +1,113 @@
 package stats;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 
 import alignment.Alignment;
 import sequence.Element;
 import sequence.Sequence;
+import utils.Company;
 
 public abstract class AlignmentStats {
-	
-	
-	
+
+	public double getMean(List<Double> dat) {
+		double sum = 0;
+		for (Double d : dat) {
+			sum += d;
+		}
+		return sum / (dat.size() + 0.0);
+	}
+
+	public double[] getMeanandVariance(List<Double> dat) {
+		double[] arr = new double[2];
+		arr[0] = getMean(dat);
+		arr[1] = getVariance(dat, arr[0]);
+		return arr;
+	}
+
+	private double getVariance(List<Double> dat, double mean) {
+
+		double sum = 0;
+		for (Double d : dat) {
+			sum += Math.pow((d - mean), 2);
+		}
+		return sum / (dat.size() - 1.0);
+	}
+
+	public double getVariance(List<Double> dat) {
+		return getVariance(dat, getMean(dat));
+
+	}
+
+	/**
+	 * position 0 is mean, position2 is variance
+	 * 
+	 * @param als1
+	 * @param als2
+	 * @return
+	 */
+	public double[] getAvgPointwiseSimilarity(HashMap<Company, HashMap<Company, Alignment>> als1,
+			HashMap<Company, HashMap<Company, Alignment>> als2) {
+
+		List<Double> scores = new ArrayList<>();
+		for (Company c1 : als1.keySet()) {
+			for (Company c2 : als1.get(c1).keySet()) {
+				Alignment a1 = als1.get(c1).get(c2);
+				Alignment a2 = null;
+				if (als2.containsKey(c1)) {
+					if (als2.get(c1).containsKey(c2)) {
+						a2 = als2.get(c1).get(c2);
+					}
+				}
+				if (als2.containsKey(c2)) {
+					if (als2.get(c2).containsKey(c1)) {
+						a2 = als2.get(c1).get(c2);
+					}
+				}
+				if (a2 != null) {
+					scores.add(this.pointwiseSimilarity(a1, a2));
+				}
+			}
+		}
+		return this.getMeanandVariance(scores);
+
+	}
+
+	/**
+	 * position 0 is mean, position2 is variance
+	 * 
+	 * @param als1
+	 * @param als2
+	 * @return
+	 */
+	public double[] getAvgPairwiseSimilarity(HashMap<Company, HashMap<Company, Alignment>> als1,
+			HashMap<Company, HashMap<Company, Alignment>> als2) {
+
+		List<Double> scores = new ArrayList<>();
+		for (Company c1 : als1.keySet()) {
+			for (Company c2 : als1.get(c1).keySet()) {
+				Alignment a1 = als1.get(c1).get(c2);
+				Alignment a2 = null;
+				if (als2.containsKey(c1)) {
+					if (als2.get(c1).containsKey(c2)) {
+						a2 = als2.get(c1).get(c2);
+					}
+				}
+				if (als2.containsKey(c2)) {
+					if (als2.get(c2).containsKey(c1)) {
+						a2 = als2.get(c1).get(c2);
+					}
+				}
+				if (a2 != null) {
+					scores.add(this.pairwiseSimilarity(a1, a2));
+				}
+			}
+		}
+		return this.getMeanandVariance(scores);
+
+	}
 
 	public double pointwiseSimilarity(Alignment a1, Alignment a2) {
 		Sequence s1, s2, t1, t2;
@@ -59,7 +156,7 @@ public abstract class AlignmentStats {
 			}
 		}
 
-		return numSame;
+		return numSame / (0.0 + Math.min(a1.length(), a2.length()));
 	}
 
 	private HashSet<String> getPairs(Alignment a) {

@@ -194,22 +194,7 @@ public class ThresholdNetwork {
 		return v;
 	}
 
-	public void saveNetwork(File f) {
-
-		String toPrint = "";
-		for (StockVertex v : V_) {
-			toPrint += this.getAdjacencyListAsString(v) + ", \n";
-		}
-		try {
-			PrintWriter pw = new PrintWriter(f);
-			pw.println(toPrint.substring(0, toPrint.lastIndexOf(',')));
-			pw.flush();
-		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	//	System.out.println(toPrint.substring(0, toPrint.lastIndexOf(',')) + "};");
-	}
+	
 
 	
 

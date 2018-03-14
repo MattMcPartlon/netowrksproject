@@ -3,9 +3,11 @@ package alignment;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
+import java.nio.channels.IllegalSelectorException;
 import java.util.Arrays;
 
 import javax.rmi.CORBA.Util;
+import javax.security.auth.kerberos.KerberosKey;
 
 import scoring.ScoreFunction;
 import sequence.Element;
@@ -25,28 +27,30 @@ public class NWSemiGlobalAligner extends NWAligner {
 		for (int i = 0; (n - i) >= (n - Utilities.MAX_LAG); i++) {
 			best = getVal(A, m, n - i) > best ? getVal(A, m, n - i) : best;
 		}
+
 		for (int i = 0; (m - i) >= (m - Utilities.MAX_LAG); i++) {
 			best = getVal(A, m - i, n) > best ? getVal(A, m - i, n) : best;
 		}
-
+	
 		return best;
 	}
 
+
+
 	private int[] getBestIndex() {
 		double best = Integer.MIN_VALUE;
-		double val=0;
+		double val = 0;
 		int m, n;
 		m = s_.length();
 		n = t_.length();
-		
-		
+
 		int[] bestIndex = new int[] { m, n };
 
 		// find best entry such that s[m] aligned with t[n-i] (i.e. rest of t
 		// aligned to gap)
 		for (int i = 0; (n - i) >= (n - Utilities.MAX_LAG); i++) {
 			val = getVal(A, m, n - i);
-			
+
 			if (val > best) {
 				best = val;
 				bestIndex = new int[] { m, n - i };
@@ -56,7 +60,7 @@ public class NWSemiGlobalAligner extends NWAligner {
 		// aligned to gap)
 		for (int i = 0; (m - i) >= (m - Utilities.MAX_LAG); i++) {
 			val = getVal(A, m - i, n);
-			
+
 			if (val > best) {
 				best = val;
 				bestIndex = new int[] { m - i, n };
@@ -68,7 +72,8 @@ public class NWSemiGlobalAligner extends NWAligner {
 
 	public Alignment doTraceback() {
 		Sequence aS, aT;
-
+		boolean exceptionCaught = false;
+		
 		aS = new Sequence(s_.getData());
 		aT = new Sequence(t_.getData());
 		// figure out which entry of A we are starting from
@@ -76,9 +81,7 @@ public class NWSemiGlobalAligner extends NWAligner {
 		int i = index[0], j = index[1], m = s_.length(), n = t_.length(), current = A;
 		// if i<m then t[n] is aligned to s[i] and s[i+1]...s[m] aligned to gap
 		double tempScore = getVal(A, i, j);
-		if (tempScore == 0.0) {
-			System.out.println("i: " + i + ", j: " + j);
-		}
+		
 		for (int k = m; k > i; k--) {
 			aS.add(s_.get(k));
 			aT.add(Element.gap);
@@ -90,56 +93,114 @@ public class NWSemiGlobalAligner extends NWAligner {
 			aT.add(t_.get(k));
 		}
 
-		for (; i > 0 || j > 0;) {
-			int from = (int) getBackPointer(current, i, j);
-			// CASE
-			switch (current) {
-			case A:
-				if (debug) {
-					System.out.println("Case A");
-				}
-				aS.add(s_.get(i));
-				aT.add(t_.get(j));
-				i -= 1;
-				j -= 1;
-				break;
-			case B:
+		int starti = i;
+		int startj = j;
+		try {
+			for (; i > 0 || j > 0;) {
+				int from = (int) getBackPointer(current, i, j);
+				// CASE
+				switch (current) {
+				case A:
+					if (debug) {
+						System.out.println("Case A");
+					}
+					if (i == 0 || j == 0) {
+						throw new IllegalSelectorException();
+					}
+					aS.add(s_.get(i));
+					aT.add(t_.get(j));
+					i -= 1;
+					j -= 1;
+					break;
+				case B:
 
-				if (debug) {
-					System.out.println("Case B");
-				}
-				aS.add(Element.gap);
-				aT.add(t_.get(j));
-				j -= 1;
-				break;
-			case C:
+					if (debug) {
+						System.out.println("Case B");
+					}
+					aS.add(Element.gap);
+					aT.add(t_.get(j));
+					j -= 1;
+					break;
+				case C:
 
-				if (debug) {
-					System.out.println("Case C");
-				}
-				aS.add(s_.get(i));
-				aT.add(Element.gap);
-				i -= 1;
-				break;
-			case NONE:
-				if (debug) {
-					System.out.println("Case NONE");
-				}
-				System.out.println("ERROR IN SEMI-GLOBAL ALIGN");
-				i = 0;
-				j = 0;
-				break;
+					if (debug) {
+						System.out.println("Case C");
+					}
+					aS.add(s_.get(i));
+					aT.add(Element.gap);
+					i -= 1;
+					break;
+				case NONE:
+					if (debug) {
+						System.out.println("Case NONE");
+					}
+					System.out.println("ERROR IN SEMI-GLOBAL ALIGN");
+					i = 0;
+					j = 0;
+					break;
 
-			default:
-				break;
+				default:
+					break;
+				}
+				if (debug) {
+					System.out.println("from: " + from);
+					System.out.println("i: " + i + ", j: " + j);
+					System.out.println("aligned: " + aS.get(Math.max(s_.length() - i, 1)) + ","
+							+ aT.get(Math.max(t_.length() - j, 1)));
+				}
+				current = from;
 			}
-			if (debug) {
-				System.out.println("from: " + from);
-				System.out.println("i: " + i + ", j: " + j);
-				System.out.println("aligned: " + aS.get(Math.max(s_.length() - i, 1)) + ","
-						+ aT.get(Math.max(t_.length() - j, 1)));
+		} catch (Exception e) {
+			if (Utilities.TESTMODE) {
+				System.out.println("***************************");
+				System.out.println("best score: " + tempScore);
+				System.out.println("i: " + i + ", j:" + j);
+				System.out.println("aT length: " + aS.length());
+				System.out.println("aT length: " + aT.length());
+				System.out.println("t length: " + t_.length());
+				System.out.println("s length: " + s_.length());
+				System.out.println("aS: " + aS.asString());
+				System.out.println("aT: " + aT.asString());
+				System.out.println("aS name: " + aS.getID());
+				System.out.println("aT name: " + aT.getID());
+				System.out.println("unencoded aS: " + s_.toString());
+				System.out.println("unencoded aT: " + t_.toString());
+				System.out.println("starti: " + starti);
+				System.out.println("startj: " + startj);
+				System.out.println("start index: " + Arrays.toString(index));
+				System.out.println("******************************");
+				String a = "", b = "", c = "";
+				for (int k = 0; k < a_.length; k++) {
+					a += a_[1][k][0] + ", ";
+					b += b_[1][k][0] + ", ";
+					c += c_[1][k][0] + ", ";
+				}
+				String ab = "", bb = "", cb = "";
+				for (int k = 0; k < a_.length; k++) {
+					ab += a_[1][k][1] + ", ";
+					bb += b_[1][k][1] + ", ";
+					cb += c_[1][k][1] + ", ";
+				}
+				System.out.println("a: " + a);
+				System.out.println("b: " + b);
+				System.out.println("c: " + c);
+				System.out.println("ab: " + ab);
+				System.out.println("bb: " + bb);
+				System.out.println("cb: " + cb);
+				exceptionCaught = true;
+
+			
+				for (int idx = 0; (n - idx) >= (n - Utilities.MAX_LAG); idx++) {
+					System.out.print("  i: " + idx + ", val: " + getVal(A, m, n - idx));
+				}
+
+				for (int idx = 0; (m - idx) >= (m - Utilities.MAX_LAG); idx++) {
+					System.out.print("  i: " + idx + ", val: " + getVal(A, m - idx, n));
+				}
+				System.out.println();
+
+				System.exit(0);
 			}
-			current = from;
 		}
 		// should be done, and aS and aT are sequences to align
 
@@ -149,25 +210,11 @@ public class NWSemiGlobalAligner extends NWAligner {
 		Alignment a = new Alignment(aS, aT, s_, t_, AlignmentType.NWSemiGlobal);
 		a.setTempScore(tempScore);
 
-		if (Utilities.TESTMODE) {
-			try {
-
-				if (tempScore == 0.0) {
-					PrintWriter pw = new PrintWriter(new File("temp.txt"));
-					for (int k = 0; k <= n; k++) {
-						for (int l = 0; l < n; l++) {
-							pw.print(getVal(A, k, l) + " ");
-						}
-						pw.println();
-					}
-				}
-			} catch (FileNotFoundException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-
+		if (!exceptionCaught) {
+			return a;
+		} else {
+			return new Alignment();
 		}
-		return a;
 
 	}
 
@@ -180,21 +227,21 @@ public class NWSemiGlobalAligner extends NWAligner {
 	@Override
 	public void initializeA() {
 		setVal(A, 0, 0, 0);
-		initializeFirstColVal(A, Integer.MIN_VALUE);
-		initializeFirstRowVal(A, Integer.MIN_VALUE);
+		initializeFirstColVal(A, Integer.MIN_VALUE + 2000);
+		initializeFirstRowVal(A, Integer.MIN_VALUE + 2000);
 	}
 
 	@Override
 	public void initializeB() {
 		setVal(B, 0, 0, 0);
-		initializeFirstColVal(B, Integer.MIN_VALUE);
+		initializeFirstColVal(B, Integer.MIN_VALUE + 2000);
 
 		// initializeFirstRowVal(B, 0);
 		for (int i = 1; i <= t_.length(); i++) {
 			if (i <= Utilities.MAX_LAG) {
 				setVal(B, 0, i, 0);
 			} else {
-				setVal(B, 0, i, Integer.MIN_VALUE);
+				setVal(B, 0, i, Integer.MIN_VALUE + 2000);
 			}
 		}
 		initializeFirstRowBackPointer(B, B);
@@ -207,12 +254,12 @@ public class NWSemiGlobalAligner extends NWAligner {
 			if (i <= Utilities.MAX_LAG) {
 				setVal(C, i, 0, 0);
 			} else {
-				setVal(C, i, 0, Integer.MIN_VALUE);
+				setVal(C, i, 0, Integer.MIN_VALUE + 2000);
 			}
 		}
 
 		initializeFirstColBackPointer(C, C);
-		initializeFirstRowVal(C, Integer.MIN_VALUE);
+		initializeFirstRowVal(C, Integer.MIN_VALUE + 2000);
 	}
 
 	/**
@@ -233,7 +280,7 @@ public class NWSemiGlobalAligner extends NWAligner {
 		// want to choose the best of a,b,and c and add to cost
 		double val = max(a, b, c);
 		setVal(A, i, j, cost + val);
-		return (val == a) ? A : (val == b) ? B : C;
+		return returnBest(i, j, val, a, b, c);
 	}
 
 	@Override
@@ -251,6 +298,12 @@ public class NWSemiGlobalAligner extends NWAligner {
 	public Aligner clone() {
 		// TODO Auto-generated method stub
 		return new NWSemiGlobalAligner();
+	}
+
+	@Override
+	public AlignmentType getAlignmentType() {
+		// TODO Auto-generated method stub
+		return AlignmentType.NWSemiGlobal;
 	}
 
 }

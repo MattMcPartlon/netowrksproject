@@ -12,6 +12,7 @@ import network.StockVertex;
 import network.ThresholdNetwork;
 import network.Vertex;
 import network.WeightedEdge;
+import utils.Utilities;
 
 public class NetworkStatsIO {
 
@@ -22,6 +23,9 @@ public class NetworkStatsIO {
 	}
 
 	public void saveNetwork(File f) {
+		if(Utilities.VERBOSE){
+			System.out.println("saving network");
+		}
 		List<StockVertex> V = net_.getVertices();
 		String toPrint = "";
 		for (StockVertex v : V) {
@@ -29,25 +33,33 @@ public class NetworkStatsIO {
 		}
 		try {
 			PrintWriter pw = new PrintWriter(f);
-			pw.println(""+toPrint.substring(0,toPrint.length()-1)+"");
+			pw.println("" + toPrint.substring(0, toPrint.length() - 1) + "");
 			pw.flush();
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		
+		if(Utilities.VERBOSE){
+			System.out.println("network saved");
+			System.out.println("*****************");
+		}
+
 	}
 
 	public void saveOffsets(File f) {
+		if(Utilities.VERBOSE){
+			System.out.println("saving offsets");
+		}
 		List<StockVertex> V = net_.getVertices();
 		double[][] offsets = new double[V.size()][V.size()];
 		for (Vertex v : V) {
 			Collection<Edge> incidentEdges = net_.getIncidentEdges(v);
 			for (Edge e : incidentEdges) {
-				double offset = ((WeightedEdge) e).getAvgGapOffset(v);
+				double avgGap = ((WeightedEdge) e).getAvgGaps();
 				Vertex u = e.getOpposite(v);
-				offsets[v.getIndex()][u.getIndex()] = offset;
-				
+				offsets[v.getIndex()][u.getIndex()] = avgGap;
+
 			}
 		}
 		try {
@@ -63,19 +75,27 @@ public class NetworkStatsIO {
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+		}
+		if(Utilities.VERBOSE){
+			System.out.println("offsets saved");
+			System.out.println("*****************");
 		}
 	}
 
 	public void saveGaps(File f) {
+		if(Utilities.VERBOSE){
+			System.out.println("saving gaps");
+			
+		}
 		List<StockVertex> V = net_.getVertices();
 		double[][] offsets = new double[V.size()][V.size()];
 		for (Vertex v : V) {
 			Collection<Edge> incidentEdges = net_.getIncidentEdges(v);
 			for (Edge e : incidentEdges) {
-				double offset = ((WeightedEdge) e).getAvgGapOffset(v);
+				double avgGaps = ((WeightedEdge) e).getAvgGaps();
 				Vertex u = e.getOpposite(v);
-				offsets[v.getIndex()][u.getIndex()] = offset;
-				
+				offsets[v.getIndex()][u.getIndex()] = avgGaps;
+
 			}
 		}
 		try {
@@ -92,9 +112,19 @@ public class NetworkStatsIO {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		
+		if(Utilities.VERBOSE){
+			System.out.println("gaps saved");
+			System.out.println("*****************");
+			
+		}
 	}
 
 	public void saveSectorIDs(File f) {
+		if(Utilities.VERBOSE){
+			System.out.println("saving sector ids");
+			
+		}
 		System.out.println();
 		List<StockVertex> V = net_.getVertices();
 		String toPrint = "{";
@@ -110,9 +140,19 @@ public class NetworkStatsIO {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		
+		if(Utilities.VERBOSE){
+			System.out.println("sector id's saved");
+			System.out.println("*****************");
+			
+		}
 	}
 
 	public void saveVertexDat(File f) {
+		if(Utilities.VERBOSE){
+			System.out.println("saving vertex data");
+			
+		}
 		System.out.println();
 		List<StockVertex> V = net_.getVertices();
 		String toPrint = "{";
@@ -128,6 +168,11 @@ public class NetworkStatsIO {
 			e.printStackTrace();
 
 		}
+		if(Utilities.VERBOSE){
+			System.out.println("vertex data saved");
+			System.out.println("*****************");
+		}
+			
 	}
 
 }

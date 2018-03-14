@@ -3,6 +3,7 @@ package io.sequence;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Scanner;
 import java.util.regex.Matcher;
@@ -67,7 +68,7 @@ public class StockPriceReader extends SReader {
 													// String
 						String price = regexMatcher.group(1);
 						double val = Double.parseDouble(price);
-						Element e = new Element(price, pos, "price of " + company + " on date?" + " + " + pos, val);
+						Element e = new Element("elt", pos, "price of " + company + " on date?" + " + " + pos, val);
 						seq.add(e);
 						pos++;
 
@@ -83,6 +84,9 @@ public class StockPriceReader extends SReader {
 
 		return sequences;
 	}
+	
+	
+	
 
 	public static void main(String[] args) {
 		Utilities.init();
